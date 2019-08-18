@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+   <!-- 读取属性文件   jdbc.properties-->
+   <properties resource="jdbc.properties"></properties>
+    <settings>
+    
+    	<setting name="logImpl" value="LOG4J"/>
+    
+  </settings>
+  
+ 	<!-- 别名 -->
+ 	<typeAliases >
+ 		<package name="com.web.entity"/>
+ 	</typeAliases>
+ 	
+  <!-- 环境 -->
+  <environments default="development">
+    <environment id="development"><!-- 开发模式 -->
+      <transactionManager type="JDBC"/><!-- jdbc事务管理 -->
+      <dataSource type="POOLED"><!-- 数据源为线程池 -->
+        <property name="driver" value="${jdbc.driver}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+      </dataSource>
+    </environment>
+  </environments>
+  
+  <!-- 映射文件的配置 -->
+  <mappers>
+<!--      <mapper resource="com/web/mapper/positionMapper.xml"/> -->
+      <mapper resource="com/web/mapper/departmentMapper.xml"/>
+      <mapper resource="com/web/mapper/registrationMapper.xml"/>
+      <mapper resource="com/web/mapper/registrationTypeMapper.xml"/>
+      <mapper resource="com/web/mapper/patientHistoryMapper.xml"/>
+      <mapper resource="com/web/mapper/drugStoreMapper.xml"/>
+      <mapper resource="com/web/mapper/CheckProjectMapper.xml"/>
+      <mapper resource="com/web/mapper/OperationRoomMapper.xml"/>
+      <mapper resource="com/web/mapper/OperationMapper.xml"/>
+      <mapper resource="com/web/mapper/CheckRecordMapper.xml"/>
+      <mapper resource="com/web/mapper/TestProjectMapper.xml"/>
+      <mapper resource="com/web/mapper/OrderDetailMapper.xml"/>
+      <mapper resource="com/web/mapper/DrugOrderDao.xml"/>
+      <mapper resource="com/web/mapper/SupplierDrugOrderDao.xml"/>
+      <mapper resource="com/web/mapper/OutRecordMapper.xml"/>
+      <mapper resource="com/web/mapper/InTestProjectMapper.xml"/>
+      <mapper resource="com/web/mapper/InRecordMapper.xml"/>
+      <mapper resource="com/web/mapper/InCheckProjectMapper.xml"/>
+      <mapper resource="com/web/mapper/illnessEreaMapper.xml"/>
+      <mapper resource="com/web/mapper/DutyMapper.xml"/>
+      <mapper resource="com/web/mapper/BedMapper.xml"/>
+      <mapper resource="com/web/mapper/ChargeProjectSituationMapper.xml"/>
+      <mapper resource="com/web/mapper/DoctorAdviceMapper.xml"/>
+      <mapper resource="com/web/mapper/DrugMapper.xml"/>
+      <mapper resource="com/web/mapper/PatientMapper.xml"/>
+      <mapper resource="com/web/mapper/PrescriptionMapper.xml"/>
+      <mapper resource="com/web/mapper/SupplierMapper.xml"/>
+      <mapper resource="com/web/mapper/PositionMenuDao.xml"/>
+      <mapper resource="com/web/mapper/MenuDao.xml"/>
+      <mapper resource="com/web/mapper/PositionDao.xml"/>
+      <mapper resource="com/web/mapper/UserDao.xml"/>
+  </mappers>
+</configuration>

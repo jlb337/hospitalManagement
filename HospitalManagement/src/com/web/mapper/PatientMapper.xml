@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace:命名空间  -->
+<mapper namespace="com.web.dao.PatientDao">
+
+
+
+
+   <!-- 自定义结果集 -->
+   <resultMap type="Patient" id="resultPatient">
+   
+      <!-- 主键   column:表中的字段名称      property:类中的属性名称 -->
+      <id column="patientID" property="patientID"/>
+      
+      <result column="isDelete" property="isDelete"/>
+      <result column="patientName" property="patientName"/>
+      <result column="sex" property="sex"/>
+      <result column="birthday" property="birthday"/>
+      <result column="age" property="age"/>
+      <result column="occupation" property="occupation"/>
+      <result column="birthPlace" property="birthPlace"/>
+      <result column="nation" property="nation"/>
+      <result column="ID" property="ID"/>
+      <result column="nationality" property="nationality"/>
+      <result column="workPlace" property="workPlace"/>
+      <result column="tel" property="tel"/>
+      <result column="postCode" property="postCode"/>
+      <result column="permanentAddress" property="permanentAddress"/>
+      <result column="contactPersonName" property="contactPersonName"/>
+      <result column="contactPersonAddress" property="contactPersonAddress"/>
+      <result column="contactPersonRelationship" property="contactPersonRelationship"/>
+      <result column="contactPersonTel" property="contactPersonTel"/>
+      <result column="marrySituation" property="marrySituation"/>
+            
+            
+      <!--一对多   property:属性名称   javaType：关联的对象类型-->
+      <!-- 
+      <collection property="chargeProjectSituations" ofType="ChargeProjectSituation">
+           <id column="chargeID" property="chargeID"/>
+           
+           <result column="patientID" property="patientID"/>
+           <result column="chargeType" property="chargeType"/>
+           <result column="chargeTypeMoney" property="chargeTypeMoney"/>
+           <result column="flagCheckOut" property="flagCheckOut"/>
+           <result column="flagTransfer" property="flagTransfer"/>
+           <result column="isDelete" property="isDelete"/>
+      </collection> 
+      
+      
+      <collection property="checkRecords" ofType="CheckRecord">
+           <id column="checkRecordID" property="checkRecordID"/>
+           
+           <result column="checkID" property="checkID"/>
+           <result column="patientID" property="patientID"/>
+           <result column="checkDate" property="checkDate"/>
+           <result column="checkResult" property="checkResult"/>
+           <result column="isDelete" property="isDelete"/>
+      </collection> 
+      
+      
+      <collection property="doctorAdvices" ofType="DoctorAdvice">
+           <id column="willID" property="willID"/>
+           
+           <result column="userId" property="userId"/>
+           <result column="patientHistoryID" property="patientHistoryID"/>
+           <result column="patientID" property="patientID"/>
+           <result column="startDate" property="startDate"/>
+           <result column="endDate" property="endDate"/>
+           <result column="doctorAdvice" property="doctorAdvice"/>
+           <result column="illnessName" property="illnessName"/>
+           <result column="flagOut" property="flagOut"/>
+           <result column="isDelete" property="isDelete"/>
+      </collection> 
+      
+      
+      <collection property="operations" ofType="Operation">
+           <id column="operationID" property="operationID"/>
+           
+           <result column="patientID" property="patientID"/>
+           <result column="operationName" property="operationName"/>
+           <result column="sleepMethod" property="sleepMethod"/>
+           <result column="hurtSituation" property="hurtSituation"/>
+           <result column="operationDate" property="operationDate"/>
+           <result column="operationPersistentTime" property="operationPersistentTime"/>
+           <result column="operationResult" property="operationResult"/>
+           <result column="operationCost" property="operationCost"/>
+           <result column="isDelete" property="isDelete"/>
+      </collection> 
+      
+      
+      <collection property="prescriptions" ofType="Prescription">
+           <id column="prescriptionID2" property="prescriptionID2"/>
+           
+           <result column="patientID" property="patientID"/>
+           <result column="prescriptionContent" property="prescriptionContent"/>
+           <result column="note" property="note"/>
+           <result column="prescriptionDate" property="prescriptionDate"/>
+           <result column="prescriptionCost" property="prescriptionCost"/>
+           <result column="isDelete" property="isDelete"/>
+      </collection> 
+      
+      
+      <collection property="registrations" ofType="Registration">
+           <id column="registrationID" property="registrationID"/>
+           
+           <result column="patientHistoryID" property="patientHistoryID"/>
+           <result column="patientID" property="patientID"/>
+           <result column="userId" property="userId"/>
+           <result column="registrationTypeID" property="registrationTypeID"/>
+           <result column="departmentID" property="departmentID"/>
+           <result column="registrationFee" property="registrationFee"/>
+           <result column="registrationDate" property="registrationDate"/>
+           <result column="operatorID" property="operatorID"/>
+           <result column="registrationCost" property="registrationCost"/>
+           <result column="isDelete" property="isDelete"/>
+      </collection> 
+       -->
+   </resultMap>
+   
+   
+<select id="query_Name" resultType="Patient">
+	select * from Patient
+</select>
+
+
+     <!-- 自定义SQL语句，以便于其他地方重复使用 -->
+     <sql id="PatientCondition">
+           <where>
+           p.isDelete = 0	
+		         <!-- p.patientID = c_p_s.patientID = c_r.patientID = d_a.patientID = o.patientID = p_s.patientID = r.patientID and p.isDelete = 0 -->
+				  <if test=" patientName != null and patientName !=''">
+				      and patientName like concat('%',concat(#{patientName},'%'))
+				  </if>
+				  <if test=" age != null and age !=''">
+				      and age like concat('%',concat(#{age},'%'))
+				  </if>
+				  <if test=" ID != null and ID !=''">
+				      and ID like concat('%',concat(#{ID},'%'))
+				  </if>
+				  <if test=" postCode != null and postCode !=''">
+				      and postCode like concat('%',concat(#{postCode},'%'))
+				  </if>
+		    </where>
+     </sql>
+   
+   
+
+   
+   
+   
+   <select id="selectByID" parameterType="Integer" resultType="Patient">
+   		select * from Patient where patientID=#{patientID}
+   </select>
+   
+   
+   
+   <select id="selectByCondition" parameterType="Patient" resultMap="resultPatient">
+   		SELECT p.*
+		    from Patient p
+		   <include refid="PatientCondition"/>
+   </select>
+   
+   
+    <!-- 修改 -->
+    <update id="update" parameterType="Patient">
+         update Patient set
+         <if test="patientName !=null and patientName !=''">
+             patientName=#{patientName},
+		 </if>
+         <if test="sex !=null and sex !=''">
+		     sex=#{sex},
+		 </if>
+		 <if test="birthday !=null and birthday !=''">
+		     birthday=#{birthday},
+		 </if>
+         <if test="age !=null and age !=''">
+		     age=#{age},
+		 </if>
+		 <if test="occupation !=null and occupation !=''">
+		     occupation=#{occupation},
+		 </if>
+		 <if test="birthPlace !=null and birthPlace !=''">
+		     birthPlace=#{birthPlace},
+		 </if>
+		 <if test="nation !=null and nation !=''">
+		     nation=#{nation},
+		 </if>
+		 <if test="ID !=null and ID !=''">
+		     ID=#{ID},
+		 </if>
+		 <if test="nationality !=null and nationality !=''">
+		     nationality=#{nationality},
+		 </if>
+		 <if test="workPlace !=null and workPlace !=''">
+		     workPlace=#{workPlace},
+		 </if>
+		 <if test="tel !=null and tel !=''">
+		     tel=#{tel},
+		 </if>
+		 <if test="postCode !=null and postCode !=''">
+		     postCode=#{postCode},
+		 </if>
+		 <if test="permanentAddress !=null and permanentAddress !=''">
+		     permanentAddress=#{permanentAddress},
+		 </if>
+		 <if test="contactPersonName !=null and contactPersonName !=''">
+		     contactPersonName=#{contactPersonName},
+		 </if>
+		 <if test="contactPersonAddress !=null and contactPersonAddress !=''">
+		     contactPersonAddress=#{contactPersonAddress},
+		 </if>
+		 <if test="contactPersonRelationship !=null and contactPersonRelationship !=''">
+		     contactPersonRelationship=#{contactPersonRelationship},
+		 </if>
+		 <if test="contactPersonTel !=null and contactPersonTel !=''">
+		     contactPersonTel=#{contactPersonTel},
+		 </if>
+		 <if test="marrySituation !=null and marrySituation !=''">
+		     marrySituation=#{marrySituation}
+		 </if>
+		  where patientID=#{patientID}
+    </update>
+    
+    
+    <!-- 删除 -->
+    <update id="delete">
+    update Patient set
+    <if test="patientID !=null and patientID !=''">
+    	 isDelete = 1 
+    </if>
+    where patientID=#{patientID}
+    </update>
+    
+    <!-- 插入 -->
+    <insert id="insert" parameterType="Patient">
+         <!-- 返回自动增长后的主键   keyColumn：表中的字段名   keyProperty:类中的属性名
+          select  uuid()   resultType="String"
+           
+        <selectKey keyColumn="patientID" keyProperty="patientID" resultType="int">
+             SELECT LAST_INSERT_ID()
+        </selectKey> -->
+        
+       insert into Patient 
+       (patientID,patientName,sex,birthday,age,occupation,birthPlace,nation,ID,nationality,workPlace,tel,postCode,permanentAddress,
+       contactPersonName,contactPersonAddress,contactPersonRelationship,contactPersonTel,marrySituation,isDelete)
+       values(#{patientID},#{patientName},#{sex},#{birthday},#{age},#{occupation},#{birthPlace},#{nation},#{ID},#{nationality},
+       #{workPlace},#{tel},#{postCode},#{permanentAddress},#{contactPersonName},#{contactPersonAddress},#{contactPersonRelationship},
+       #{contactPersonTel},#{marrySituation},0)
+    </insert>
+
+
+
+</mapper>

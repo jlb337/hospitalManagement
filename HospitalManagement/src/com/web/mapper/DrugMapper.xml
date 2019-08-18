@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace:命名空间  -->
+<mapper namespace="com.web.dao.DrugDao">
+
+   <!-- 自定义结果集 -->
+   <resultMap type="Drug" id="resultDrug">
+   
+     <!-- 主键   column:表中的字段名称      property:类中的属性名称 -->
+      <id column="drugID" property="drugID"/>
+      
+      <result column="isDelete" property="isDelete"/>
+      <result column="drugStoreID" property="drugStoreID"/>
+      <result column="drugName" property="drugName"/>
+      <result column="drugType" property="drugType"/>
+      <result column="drugUnit" property="drugUnit"/>
+      <result column="drugUnitPrice" property="drugUnitPrice"/>
+      <result column="drugProductionDate" property="drugProductionDate"/>
+      <result column="drugLife" property="drugLife"/>
+            
+<!--        一对一   property:属性名称   javaType：关联的对象类型 -->
+<!--        <association property="prescription" javaType="Prescription"> -->
+<!--          <id column="prescriptionID2" property="prescriptionID2"/> -->
+         
+<!--          <result column="isDelete" property="isDelete"/> -->
+<!--          <result column="patientID" property="patientID"/> -->
+<!--          <result column="prescriptionContent" property="prescriptionContent"/> -->
+<!--          <result column="note" property="note"/> -->
+<!--          <result column="prescriptionDate" property="prescriptionDate"/> -->
+<!--          <result column="prescriptionCost" property="prescriptionCost"/> -->
+<!--      </association> -->
+            
+       <!--一对一   property:属性名称   javaType：关联的对象类型-->
+       <association property="drugstore" javaType="DrugStore">
+         <id column="drugStoreID" property="drugStoreID"/>
+         
+         <result column="isDelete" property="isDelete"/>
+         <result column="userId" property="userId"/>
+         <result column="drugStoreLeader" property="drugStoreLeader"/>
+         <result column="drugStoreType" property="drugStoreType"/>
+         <result column="drugStoreArea" property="drugStoreArea"/>
+     </association>
+   </resultMap>
+   
+   
+   
+        <!-- 自定义SQL语句，以便于其他地方重复使用 -->
+     <sql id="DrugCondition">
+           <where>
+		         d.drugStoreID = s.drugStoreID and d.isDelete = 0
+				  <if test="drugName !=null and drugName !=''">
+				      and drugName like concat('%',concat(#{drugName},'%'))
+				  </if>
+				  <if test="drugType !=null and drugType != ''">
+				      and drugType like concat('%',concat(#{drugType},'%'))
+				  </if>
+				  <if test=" drugUnitPrice1 != null">
+		            	<if test="drugUnitPrice2 == null">
+		            	 and drugUnitPrice >= #{drugUnitPrice1}
+		            	</if>
+		            	<if test=" drugUnitPrice2 !=null">
+		           		 and drugUnitPrice between #{drugUnitPrice1} and #{drugUnitPrice2}
+		        	   </if>
+		      	  </if>
+				  <if test="drugStoreLeader !=null and drugStoreLeader !=''">
+				      and s.drugStoreLeader like concat('%',concat(#{drugStoreLeader},'%'))
+				  </if>
+		    </where>
+     </sql>
+   
+   
+   
+   <select id="query" resultType = "Drug">
+   	select * from Drug
+   </select>
+   
+   
+   <select id="selectByID" parameterType="Integer" resultType="Drug">
+   		select * from Drug where drugID=#{drugID}
+   </select>
+   
+   
+   
+   <select id="selectByCondition" parameterType="map" resultMap="resultDrug">
+   		SELECT d.*, s.*
+		    from Drug d, DrugStore s
+		   <include refid="DrugCondition"/>
+   </select>
+   
+   
+    <!-- 修改 -->
+    <update id="update" parameterType="Drug">
+         update Drug set
+         <if test="drugStoreID !=null and drugStoreID !=''">
+		     drugStoreID=#{drugStoreID},
+		 </if>
+		 <if test="drugName !=null and drugName !=''">
+		     drugName=#{drugName},
+		 </if>
+         <if test="drugType !=null and drugType !=''">
+		     drugType=#{drugType},
+		 </if>
+		 <if test="drugUnit !=null and drugUnit !=''">
+		     drugUnit=#{drugUnit},
+		 </if>
+		 <if test="drugUnitPrice !=null and drugUnitPrice !=''">
+		     drugUnitPrice=#{drugUnitPrice},
+		 </if>
+		 <if test="drugProductionDate !=null and drugProductionDate !=''">
+		     drugProductionDate=#{drugProductionDate},
+		 </if>
+		 <if test="drugLife !=null and drugLife !=''">
+		     drugLife=#{drugLife}
+		 </if>
+		  where drugID=#{drugID}
+    </update>
+    
+    
+    <!-- 删除 -->
+    <update id="delete">
+    update Drug set
+    <if test="drugID !=null and drugID !=''">
+    	 isDelete = 1 
+    </if>
+    where drugID=#{drugID}
+    </update>
+    
+    <!-- 插入 -->
+    <insert id="insert" parameterType="Drug">
+         <!-- 返回自动增长后的主键   keyColumn：表中的字段名   keyProperty:类中的属性名
+          select  uuid()   resultType="String"
+        <selectKey keyColumn="drugID" keyProperty="drugID" resultType="int">
+             SELECT LAST_INSERT_ID() ,prescriptionID2
+        </selectKey>
+           -->
+        
+         insert into Drug (drugID,isDelete,drugStoreID,drugName,
+         drugType,drugUnit,drugUnitPrice,drugProductionDate,drugLife)
+       values (#{drugID},0,#{drugStoreID},#{drugName},
+       #{drugType},#{drugUnit},#{drugUnitPrice},#{drugProductionDate},#{drugLife})
+    </insert>
+
+
+</mapper>

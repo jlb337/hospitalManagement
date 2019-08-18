@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace:命名空间  -->
+<mapper namespace="com.web.dao.BedDao">
+
+   <!-- 自定义结果集 -->
+   <resultMap type="Bed" id="resultBed">
+   
+     <!-- 主键   column:表中的字段名称      property:类中的属性名称 -->
+      <id column="bedID" property="bedID"/>
+      
+      <result column="isDelete" property="isDelete"/>
+      <result column="illnessEreaID" property="illnessEreaID"/>
+      <result column="cureResult" property="cureResult"/>
+      <result column="isEmpty" property="isEmpty"/>
+      <result column="bedCost" property="bedCost"/>
+      <result column="bedCost1" property="bedCost1"/>
+      <result column="bedCost2" property="bedCost2"/>
+  
+   <!-- 多对一   property:属性名称   javaType：关联的对象类型-->
+     <association property="illnessErea" javaType="IllnessErea">
+         <id column="illnessEreaID" property="illnessEreaID"/>
+           
+          <result column="illnessEreaName" property="illnessEreaName"/>
+          <result column="bedCount" property="bedCount"/>
+          <result column="cureRate" property="cureRate"/>
+     </association>
+  </resultMap>
+     <!-- 查询 
+             SELECT d.*,p.*
+		    from t_position p,t_department d
+		       where p.deptId=d.deptId
+     -->
+    
+     
+     <!-- 自定义SQL语句，以便于其他地方重复使用 -->
+     <sql id="bedCondition">
+           <where>
+		          i.illnessEreaID = b.illnessEreaID
+		          and i.isDelete = 0
+		          and b.isDelete = 0
+				 
+				<if test="bedCost1 != null">
+		           <if test="bedCost2 == null">
+		             	and b.bedCost >= #{bedCost1}
+		           </if>
+		           <if test="bedCost2 != null">
+			            and b.bedCost between #{bedCost1} and #{bedCost2}
+			       </if>
+		        </if>
+		        
+		        <if test="bedCost1 == null and bedCost2 != null">
+		        		and b.bedCost between 0 and #{bedCost2}
+		        </if>
+				 
+				 <if test="bedID!=null">
+				       and b.bedID = #{bedID}
+				 </if>
+			 	
+			 	<if test="illnessErea.illnessEreaName!=null and illnessErea.illnessEreaName!=''">
+				       and i.illnessEreaName like concat('%',concat(#{illnessErea.illnessEreaName},'%'))
+				 </if>
+				 
+				 <if test="cureResult!=null and  cureResult!=''">
+				       and b.cureResult like concat('%',concat(#{cureResult},'%'))
+				 </if>
+		    </where>
+     </sql>
+
+
+    <select id="queryByCondition" resultMap="resultBed" parameterType="Bed">
+            SELECT b.*,i.*
+		    from Bed b,IllnessErea i
+		   <include refid="bedCondition"/>
+    </select>
+    
+    <!-- 
+     SELECT d.*,p.*
+		    from t_position p,t_department d
+         where p.deptid=d.deptid
+           and d.deptid in (1,2,3)
+           collection:集合    open：开始标签    close:结束标签      item:集合中的每个对象（变量）
+           separator:分隔符
+     -->
+    <select id="queryByIds" parameterType="Integer" resultMap="resultBed" >
+           SELECT b.*,i.*
+		    from Bed b,IllnessErea i
+		    <where>
+		         i.illnessEreaID = b.illnessEreaID
+		          and i.isDelete = 0
+		          and b.isDelete = 0
+		         <if test="ids != null and ids.size>0">
+			         <foreach collection="ids" open="and d.deptid in (" close=")" item="deptId" separator="," >
+			               #{deptId}
+			         </foreach>
+		         </if>
+		    </where>
+    </select>
+    
+     <update id="update" parameterType="Bed">
+         update Bed set
+          <if test="cureResult!=null and  cureResult!=''">
+             cureResult=#{cureResult},
+          </if>
+          <if test="isEmpty!=null">
+		      isEmpty=#{isEmpty},
+		  </if>
+		   <if test="illnessEreaID != null">
+			illnessEreaID = #{illnessEreaID},
+		   </if>
+		   <if test="bedCost!=null">
+		      bedCost=#{bedCost}
+		  </if>
+		  where bedID=#{bedID}
+    </update>
+    
+     <select id="queryById" parameterType="Integer" resultMap="resultBed" >
+           SELECT b.*,i.*
+		    from Bed b,IllnessErea i
+		    <where>
+		         i.illnessEreaID = b.illnessEreaID
+		          and i.isDelete = 0
+		          and b.isDelete = 0
+		        and b.bedID = #{bedID};
+		    </where>
+    </select>
+    
+    <update id="delete" parameterType="Integer">
+         update Bed set
+          isDelete = 1
+		  where bedID=#{bedID}
+    </update>
+    
+    <insert id="add" parameterType="Bed">
+    	insert into Bed (isDelete,illnessEreaID,cureResult,isEmpty,bedCost) 
+    	values (0,#{illnessEreaID},#{cureResult},1,#{bedCost});
+  
+    </insert>
+    
+</mapper>
+

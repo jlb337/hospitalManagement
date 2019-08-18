@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace:命名空间  -->
+<mapper namespace="com.web.dao.InRecordDao">
+
+   <!-- 自定义结果集 -->
+   <resultMap type="InRecord" id="resultInRecord">
+   
+     <!-- 主键   column:表中的字段名称      property:类中的属性名称 -->
+      <id column="inID" property="inID"/>
+      
+      <result column="isDelete" property="isDelete"/>
+      <result column="bedID" property="bedID"/>
+      <result column="departmentID" property="departmentID"/>
+      <result column="inTime" property="inTime"/>
+      <result column="inSituation" property="inSituation"/>
+      <result column="changeDepartmentSituation" property="changeDepartmentSituation"/>
+
+   <!-- 多对一   property:属性名称   javaType：关联的对象类型-->
+     <association property="bed" javaType="Bed">
+         <id column="bedID" property="bedID"/>
+           
+          <result column="cureResult" property="cureResult"/>
+          <result column="bedCost" property="bedCost"/>
+     </association>
+     
+   <!-- 多对一   property:属性名称   javaType：关联的对象类型-->
+     <association property="department" javaType="Department">
+         <id column="departmentID" property="departmentID"/>
+           
+          <result column="departmentName" property="departmentName"/>
+     </association>
+     
+        <!-- 多对一   property:属性名称   javaType：关联的对象类型-->
+     <association property="patient" javaType="Patient">
+         <id column="patientID" property="patientID"/>
+           
+          <result column="patientName" property="patientName"/>
+          <result column="ID" property="ID"/>
+     </association>
+  </resultMap>
+     <!-- 查询 
+             SELECT d.*,p.*
+		    from t_position p,t_department d
+		       where p.deptId=d.deptId
+     -->
+        
+     <!-- 自定义SQL语句，以便于其他地方重复使用 -->
+     <sql id="InRecordCondition">
+           <where>
+		          d.departmentID = i.departmentID
+		          and i.bedID = b.bedID
+		          and i.patientID = p.patientID
+		          and p.isDelete = 0
+		          and i.isDelete = 0
+		          and b.isDelete = 0
+		          and d.isDelete = 0
+				 
+				 <if test="department.departmentName!=null and  department.departmentName!=''">
+				       and d.departmentName like concat('%',concat(#{department.departmentName},'%'))
+				 </if>
+			 	
+			 	<if test="patient.patientName!=null and  patient.patientName!=''">
+				       and p.patientName like concat('%',concat(#{patient.patientName},'%'))
+				 </if>				 
+				 
+				 <if test="patient.ID!=null and  patient.ID!=''">
+				       and p.ID like concat('%',concat(#{patient.ID},'%'))
+				 </if>
+				 
+		    </where>
+     </sql>
+
+
+    <select id="queryByCondition" resultMap="resultInRecord" parameterType="InRecord">
+            SELECT b.*,i.*,p.*,d.*
+		    from InRecord i,Bed b,Patient p,Department d
+		   <include refid="InRecordCondition"/>
+    </select>
+    
+    <!-- 
+     SELECT d.*,p.*
+		    from t_position p,t_department d
+         where p.deptid=d.deptid
+           and d.deptid in (1,2,3)
+           collection:集合    open：开始标签    close:结束标签      item:集合中的每个对象（变量）
+           separator:分隔符
+     -->
+    
+     <update id="update" parameterType="InRecord">
+         update InRecord set
+         <if test="bedID != null">
+			bedID = #{bedID},
+		   </if>
+		   <if test="patientID != null">
+			patientID = #{patientID},
+		   </if>
+		   <if test="departmentID != null">
+			departmentID = #{departmentID},
+		   </if>
+		   <if test="inTime != null">
+			inTime=#{inTime},
+		   </if>
+		   <if test="inSituation != null">
+			inSituation=#{inSituation},
+		   </if>
+		   <if test="changeDepartmentSituation != null">
+			changeDepartmentSituation=#{changeDepartmentSituation}
+		   </if>
+          
+		  where inID=#{inID}
+    </update>
+    
+     <select id="queryById" parameterType="Integer" resultMap="resultInRecord" >
+           SELECT b.*,i.*,p.*,d.*
+		    from InRecord i,Bed b,Patient p,Department d
+		    <where>
+		          d.departmentID = i.departmentID
+		          and i.bedID = b.bedID
+		          and i.patientID = p.patientID
+		          and p.isDelete = 0
+		          and i.isDelete = 0
+		          and b.isDelete = 0
+		          and d.isDelete = 0
+		          and i.inID = #{inID}
+		    </where>
+    </select>
+    
+    <update id="delete" parameterType="Integer">
+         update InRecord set
+          isDelete = 1
+		  where inID=#{inID}
+    </update>
+    
+    <insert id="add" parameterType="InRecord">
+    	insert into InRecord (isDelete,bedID,departmentID,inTime,inSituation,changeDepartmentSituation,patientID) 
+    	values (0,#{bedID},#{departmentID},#{inTime},#{inSituation},#{changeDepartmentSituation},#{patientID});
+    </insert>
+    
+</mapper>
+

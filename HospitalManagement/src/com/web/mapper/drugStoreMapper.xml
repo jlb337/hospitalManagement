@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.DrugStoreDao">
+ 
+  <resultMap id="BaseResultMap" type="com.web.entity.DrugStore">
+     <id column="drugStoreID" jdbcType="INTEGER" property="drugStoreID" />
+    <result column="isDelete" jdbcType="INTEGER" property="isDelete" />
+    <result column="userId" jdbcType="INTEGER" property="userId" />
+    <result column="drugStoreLeader" jdbcType="INTEGER" property="drugStoreLeader" />
+    <result column="drugStoreType" jdbcType="VARCHAR" property="drugStoreType" />
+    <result column="drugStoreArea" jdbcType="REAL" property="drugStoreArea" />
+ 	<association property="user" javaType="User">
+ 		 <id column="userId" jdbcType="INTEGER" property="userId" />
+	    <result column="poId" jdbcType="INTEGER" property="poId" />
+	    <result column="departmentID" jdbcType="INTEGER" property="departmentID" />
+	    <result column="userName" jdbcType="VARCHAR" property="userName" />
+	    <result column="userPassword" jdbcType="VARCHAR" property="userPassword" />
+	    <result column="userPhoto" jdbcType="VARCHAR" property="userPhoto" />
+	    <result column="userSex" jdbcType="VARCHAR" property="userSex" />
+	    <result column="userBirthday" jdbcType="DATE" property="userBirthday" />
+	    <result column="userCard" jdbcType="VARCHAR" property="userCard" />
+	    <result column="userState" jdbcType="INTEGER" property="userState" />
+	    <result column="userDescribe" jdbcType="VARCHAR" property="userDescribe" />
+	    <result column="marrySituation" jdbcType="VARCHAR" property="marrySituation" />
+	    <result column="level" jdbcType="VARCHAR" property="level" />
+	    <result column="birthPlace" jdbcType="VARCHAR" property="birthPlace" />
+	    <result column="nation" jdbcType="VARCHAR" property="nation" />
+	    <result column="country" jdbcType="VARCHAR" property="country" />
+	    <result column="Telephone" jdbcType="VARCHAR" property="telephone" />
+	    <result column="Idplace" jdbcType="VARCHAR" property="idplace" />
+	    <result column="isDelete" jdbcType="INTEGER" property="isDelete" />
+ 	</association>
+  </resultMap>
+  
+  
+ 
+ <insert id="insert" parameterType="DrugStore">
+ 	insert into DrugStore values(0,#{drugStoreID},#{userId},#{drugStoreLeader},#{drugStoreType},#{drugStoreArea})
+ </insert>
+   
+  <select id="queryByCondition"  resultMap="BaseResultMap" parameterType="DrugStore">
+ 	 select * from DrugStore d,User u
+ 	 <where>
+		  d.userId=u.userId 
+		   <if test="user!=null and user!=''">
+		 	 <if test="user.userName!=null and user.userName!=''">
+		    		and u.userName like concat('%',concat(#{user.userName},'%'))
+	    	</if>
+	   		</if>
+		   <if test="drugStoreType!=null and drugStoreType!=''">
+		    		and d.drugStoreType like concat('%',concat(#{drugStoreType},'%'))
+	    	</if>
+	    	<if test="drugStoreArea!=null and drugStoreArea!=''">
+	    		and d.drugStoreArea =#{drugStoreArea}
+	    	</if>
+	    	
+	    	and d.isDelete=0 and u.isDelete=0
+		  </where>
+  </select>
+  
+  
+  <select id="findById" resultMap="BaseResultMap" parameterType="Integer">
+		select * from DrugStore where drugStoreID=#{drugStoreID}
+  </select>
+  
+  
+  <update id="update" parameterType="DrugStore">
+  		update DrugStore set  
+<!--   		<if test="drugStoreLeader!=null and drugStoreLeader!=''"> -->
+<!--              drugStoreLeader=#{drugStoreLeader} -->
+<!--           </if> -->
+           <if test="userId!=null and  userId!=''">
+		      userId=#{userId},
+		  </if>
+		   <if test="drugStoreType!=null and  drugStoreType!=''">
+		      drugStoreType=#{drugStoreType},
+		  </if>
+		  <if test="drugStoreArea!=null and drugStoreArea!=''">
+		      drugStoreArea=#{drugStoreArea}
+		  </if>
+		  where drugStoreID=#{drugStoreID}
+  </update>
+  
+  <update id="delete" parameterType="DrugStore">
+  		update DrugStore  set isDelete=1 where drugStoreID=#{drugStoreID}
+  </update>
+  
+</mapper>

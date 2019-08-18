@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.RegistrationDao">
+ 
+<resultMap id="BaseResultMap" type="com.web.entity.Registration">
+    <id column="registrationID" jdbcType="INTEGER" property="registrationID" />
+    <result column="patientHistoryID" jdbcType="INTEGER" property="patientHistoryID" />
+    <result column="patientID" jdbcType="INTEGER" property="patientID" />
+    <result column="userId" jdbcType="INTEGER" property="userId" />
+    <result column="registrationTypeID" jdbcType="INTEGER" property="registrationTypeID" />
+    <result column="departmentID" jdbcType="INTEGER" property="departmentID" />
+    <result column="registrationFee" jdbcType="REAL" property="registrationFee" />
+    <result column="registrationDate" jdbcType="DATE" property="registrationDate" />
+    <result column="isDelete" jdbcType="INTEGER" property="isDelete" />
+    <result column="operatorID" jdbcType="INTEGER" property="operatorID" />
+    <result column="registrationCost" jdbcType="REAL" property="registrationCost" />
+   
+    <association property="patient" javaType="Patient">
+ 			<id column="patientID" jdbcType="INTEGER" property="patientID" />
+		    <result column="isDelete" jdbcType="INTEGER" property="isDelete" />
+		    <result column="patientName" jdbcType="VARCHAR" property="patientName" />
+		    <result column="sex" jdbcType="VARCHAR" property="sex" />
+		    <result column="birthday" jdbcType="TIMESTAMP" property="birthday" />
+		    <result column="age" jdbcType="INTEGER" property="age" />
+		    <result column="doctorType" jdbcType="INTEGER" property="doctorType" />
+		    <result column="occupation" jdbcType="VARCHAR" property="occupation" />
+		    <result column="birthPlace" jdbcType="VARCHAR" property="birthPlace" />
+		    <result column="nation" jdbcType="VARCHAR" property="nation" />
+		    <result column="ID" jdbcType="BIGINT" property="ID" />
+		    <result column="nationality" jdbcType="VARCHAR" property="nationality" />
+		    <result column="workPlace" jdbcType="VARCHAR" property="workPlace" />
+		    <result column="Tel" jdbcType="VARCHAR" property="tel" />
+		    <result column="postCode" jdbcType="BIGINT" property="postCode" />
+		    <result column="permanentAddress" jdbcType="VARCHAR" property="permanentAddress" />
+		    <result column="contactPersonName" jdbcType="VARCHAR" property="contactPersonName" />
+		    <result column="contactPersonAddress" jdbcType="VARCHAR" property="contactPersonAddress" />
+		    <result column="contactPersonRelationship" jdbcType="VARCHAR" property="contactPersonRelationship" />
+		    <result column="contactPersonTel" jdbcType="VARCHAR" property="contactPersonTel" />
+		    <result column="marrySituation" jdbcType="VARCHAR" property="marrySituation" />
+		    <result column="work" jdbcType="VARCHAR" property="work" />
+ 	</association>	
+ 	<association property="patientHistory" javaType="PatientHistory">
+ 		 <id column="patientHistoryID" jdbcType="INTEGER" property="patientHistoryID" />
+	    <result column="isDelete" jdbcType="INTEGER" property="isDelete" />
+	    <result column="userId" jdbcType="INTEGER" property="userId" />
+	    <result column="diagnosisDate" jdbcType="DATE" property="diagnosisDate" />
+	    <result column="patientHistoryRecord" jdbcType="VARCHAR" property="patientHistoryRecord" />
+	    <result column="historytype" jdbcType="INTEGER" property="historytype" />
+ 	</association>
+ 	<association property="registrationType" javaType="registrationType">
+ 		<id column="registrationTypeID" jdbcType="INTEGER" property="registrationTypeID" />
+	    <result column="isDelete" jdbcType="INTEGER" property="isDelete" />
+	    <result column="registrationTypeName" jdbcType="VARCHAR" property="registrationTypeName" />
+ 	</association>
+ 	
+ 	<association property="department" javaType="Department">
+ 		<id column="departmentID" jdbcType="INTEGER" property="departmentID" />
+	    <result column="isDelete" jdbcType="INTEGER" property="isDelete" />
+	    <result column="departmentName" jdbcType="VARCHAR" property="departmentName" />
+	    <result column="departmentType" jdbcType="INTEGER" property="departmentType" />
+	    <result column="departmentAddress" jdbcType="VARCHAR" property="departmentAddress" />
+	    <result column="departmentPhone" jdbcType="VARCHAR" property="departmentPhone" />
+ 	</association>
+ 	
+ 	<association property="user" javaType="User">
+ 		 <id column="userId" jdbcType="INTEGER" property="userId" />
+	    <result column="poId" jdbcType="INTEGER" property="poId" />
+	    <result column="departmentID" jdbcType="INTEGER" property="departmentID" />
+	    <result column="userName" jdbcType="VARCHAR" property="userName" />
+	    <result column="userPassword" jdbcType="VARCHAR" property="userPassword" />
+	    <result column="userPhoto" jdbcType="VARCHAR" property="userPhoto" />
+	    <result column="userSex" jdbcType="VARCHAR" property="userSex" />
+	    <result column="userBirthday" jdbcType="DATE" property="userBirthday" />
+	    <result column="userCard" jdbcType="VARCHAR" property="userCard" />
+	    <result column="userState" jdbcType="INTEGER" property="userState" />
+	    <result column="userDescribe" jdbcType="VARCHAR" property="userDescribe" />
+	    <result column="marrySituation" jdbcType="VARCHAR" property="marrySituation" />
+	    <result column="level" jdbcType="VARCHAR" property="level" />
+	    <result column="birthPlace" jdbcType="VARCHAR" property="birthPlace" />
+	    <result column="nation" jdbcType="VARCHAR" property="nation" />
+	    <result column="country" jdbcType="VARCHAR" property="country" />
+	    <result column="Telephone" jdbcType="VARCHAR" property="telephone" />
+	    <result column="Idplace" jdbcType="VARCHAR" property="idplace" />
+	    <result column="isDelete" jdbcType="INTEGER" property="isDelete" />
+ 	</association>
+</resultMap>
+  
+  
+ <insert id="insert" parameterType="Registration">
+ 	insert into Registration values(#{registrationID},#{patientHistoryID},#{patientID},#{userId},#{registrationTypeID},#{departmentID},#{registrationFee},#{registrationDate},0,#{operatorID})
+ </insert>
+ 
+ <select id="queryByCondition" resultMap="BaseResultMap" parameterType="Registration">
+ 	select * from Registration,PatientHistory,Patient,User,RegistrationType,Department 
+ 	<where>
+ 	
+ 	Registration.patientHistoryID=PatientHistory.patientHistoryID
+ 	and  Registration.patientID=Patient.patientID
+ 	and  Registration.userId=User.userId
+ 	and Registration.registrationTypeID=RegistrationType.registrationTypeID
+ 	and Registration.departmentID=Department.departmentID
+ 	
+ 	<if test="patientHistoryID!=null and patientHistoryID!=''">
+ 		and patientHistoryID=#{patientHistoryID}
+ 	</if>
+ 	<if test="user.userName!=null and user.userName!=''">
+ 	and User.userName=#{user.userName}
+ 	</if>
+ 	<if test="patientID!=null and patientID!=''">
+ 		and patientID=#{patientID}
+ 	</if>
+ 	<if test="userId!=null and userId!=''">
+		and userId=#{userId}
+	</if>
+	<if test="registrationTypeID!=null and registrationTypeID!=''">
+	and registrationTypeID=#{registrationTypeID}
+	</if>
+	<if test="departmentID!=null and departmentID!=''">
+	and departmentID=#{departmentID}
+	</if>
+	<if test="registrationDate!=null and registrationDate!=''">
+		and registrationDate=#{registrationDate}
+	</if>
+	and Registration.isDelete=0 and PatientHistory.isDelete=0 and Patient.isDelete=0 and User.isDelete=0 and RegistrationType.isDelete=0 and Department.isDelete=0 
+ 	</where>
+ 	 
+ </select>
+ 
+ <select id="findById" resultMap="BaseResultMap" parameterType="Integer">
+		select * from Registration,Patient
+		 where registrationID=#{registrationID} 
+  </select>
+  
+  <update id="update" parameterType="Registration">
+  	update Registration set  
+  	
+  	<if test="patientHistoryID!=null and  patientHistoryID!=''">
+             patientHistoryID=#{patientHistoryID},
+    </if>
+    
+    <if test="patientID!=null and  patientID!=''">
+             patientID=#{patientID},
+    </if>
+    <if test="userId!=null and userId!=''">
+             userId=#{userId},
+    </if>
+    <if test="registrationTypeID!=null and registrationTypeID!=''">
+             registrationTypeID=#{registrationTypeID},
+    </if>
+    
+    <if test="departmentID!=null and  departmentID!=''">
+             departmentID=#{departmentID},
+    </if>
+    
+    <if test="registrationFee!=null and  registrationFee!=''">
+             registrationFee=#{registrationFee},
+    </if>
+    
+    <if test="registrationDate!=null and registrationDate!=''">
+             registrationDate=#{registrationDate}
+    </if>
+    
+	where registrationID=#{registrationID} and Registration.isDelete=0
+  </update>
+  
+  <update id="delete" parameterType="Registration">
+  	update Registration set isDelete=1 where registrationID=#{registrationID}
+  </update>
+</mapper>

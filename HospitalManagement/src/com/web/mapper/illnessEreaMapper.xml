@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace:命名空间  -->
+<mapper namespace="com.web.dao.IllnessEreaDao">
+
+   <!-- 自定义结果集 -->
+   <resultMap type="IllnessErea" id="resultIllnessErea">
+   
+     <!-- 主键   column:表中的字段名称      property:类中的属性名称 -->
+      <id column="illnessEreaID" property="illnessEreaID"/>
+      
+      <result column="userId" property="userId"/>
+      <result column="illnessEreaName" property="illnessEreaName"/>
+      <result column="bedCount" property="bedCount"/>
+      <result column="inPeopleCount" property="inPeopleCount"/>
+      <result column="outPeopleCount" property="outPeopleCount"/>
+      <result column="cureRate" property="cureRate"/>
+      <result column="betterRate" property="betterRate"/>
+      <result column="badRate" property="badRate"/>
+      <result column="deathRate" property="deathRate"/>
+      <result column="isDiagnoseTrue" property="isDiagnoseTrue"/>
+      <result column="bedUseRate" property="bedUseRate"/>
+  
+   <!-- 多对一   property:属性名称   javaType：关联的对象类型-->
+     <association property="user" javaType="User">
+         <id column="userId" property="userId"/>
+           
+          <result column="userName" property="userName"/>
+          <result column="level" property="level"/>
+          <result column="telephone" property="telephone"/>
+     </association>
+  </resultMap>
+     <!-- 查询 
+             SELECT d.*,p.*
+		    from t_position p,t_department d
+		       where p.deptId=d.deptId
+     -->
+     <select id="query" resultMap="resultIllnessErea">
+          SELECT i.*,u.*
+		    from IllnessErea i,User u
+		       where i.userId = u.userId  and u.isDelete = 0
+		          and i.isDelete = 0;
+     </select>
+    
+     
+     <!-- 自定义SQL语句，以便于其他地方重复使用 -->
+     <sql id="IllnessEreaCondition">
+           <where>
+		           i.userId = u.userId  and u.isDelete = 0
+		          and i.isDelete = 0
+				 
+				 <if test="illnessEreaID!=null">
+				       and i.illnessEreaID = #{illnessEreaID}
+				 </if>
+				 
+				 <if test="deathRate1!=null">
+				       and i.deathRate between 0 and #{deathRate1}
+				 </if>
+				 
+				 <if test="cureRate1!=null">
+				       and i.cureRate >= #{cureRate1}
+				 </if>
+				 
+				 <if test="illnessEreaName!=null and illnessEreaName!=''">
+				       and i.illnessEreaName like concat('%',concat(#{illnessEreaName},'%')) 
+				 </if>
+		 	
+			 	<if test="user.userName!=null and user.userName!=''">
+				       and u.userName like concat('%',concat(#{user.userName},'%'))
+				 </if>
+				 
+				 <if test="user.telephone!=null and  user.telephone!=''">
+				       and u.telephone like concat('%',concat(#{user.telephone},'%'))
+				 </if>
+				 
+				  
+		    </where>
+     </sql>
+
+
+    <select id="queryByCondition" resultMap="resultIllnessErea" parameterType="IllnessErea">
+            SELECT i.*,u.*
+		    from IllnessErea i,User u
+		   <include refid="IllnessEreaCondition"/>
+    </select>
+    
+    <!-- 
+     SELECT d.*,p.*
+		    from t_position p,t_department d
+         where p.deptid=d.deptid
+           and d.deptid in (1,2,3)
+           collection:集合    open：开始标签    close:结束标签      item:集合中的每个对象（变量）
+           separator:分隔符
+     -->
+    
+     <update id="update" parameterType="IllnessErea">
+         update IllnessErea set
+         	
+         	<if test="illnessEreaName!=null and illnessEreaName!=''">
+				illnessEreaName=#{illnessEreaName}, 
+			</if>             
+			
+			<if test="bedCount!=null">
+				bedCount=#{bedCount},
+			</if>
+			
+			<if test="inPeopleCount!=null">
+				 inPeopleCount=#{inPeopleCount},
+			</if>
+			
+			<if test="outPeopleCount!=null">
+				outPeopleCount=#{outPeopleCount},
+			</if>
+			
+			<if test="cureRate!=null">
+				cureRate=#{cureRate},
+			</if>
+			
+			<if test="betterRate!=null">
+				 betterRate=#{betterRate},
+              
+			</if>
+			
+			<if test="badRate!=null">
+				 badRate=#{badRate},
+			</if>
+			
+			<if test="deathRate!=null">
+				deathRate=#{deathRate},  
+			</if>
+			
+			<if test="userId!=null">
+				userId=#{userId}
+			</if>
+                        
+		  where illnessEreaID=#{illnessEreaID}
+    </update>
+    
+     <select id="queryById" parameterType="Integer" resultMap="resultIllnessErea" >
+           SELECT i.*,u.*
+		    from IllnessErea i,User u
+		    <where>
+		         i.userId = u.userId  and u.isDelete = 0
+		          and i.isDelete = 0
+		        and i.illnessEreaID = #{illnessEreaID};
+		    </where>
+    </select>
+    
+    <update id="delete" parameterType="Integer">
+         update IllnessErea set
+          isDelete = 1
+		  where illnessEreaID=#{illnessEreaID}
+    </update>
+    
+    <insert id="add" parameterType="IllnessErea">
+    	insert into IllnessErea (isDelete,userId,illnessEreaName,bedCount,inPeopleCount,outPeopleCount,cureRate,betterRate,badRate,deathRate) 
+    	values (0,#{userId},#{illnessEreaName},#{bedCount},#{inPeopleCount},#{outPeopleCount},#{cureRate},#{betterRate},#{badRate},#{deathRate}); 
+    </insert>
+    
+</mapper>
+

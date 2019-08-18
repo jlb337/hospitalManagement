@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace:命名空间  -->
+<mapper namespace="com.web.dao.CheckRecordDao">
+
+   <!-- 自定义结果集 -->
+   <resultMap type="CheckRecord" id="resultCheckRecord">
+   
+     <!-- 主键   column:表中的字段名称      property:类中的属性名称 -->
+      <id column="checkRecordID" property="checkRecordID"/>
+      
+      <result column="checkID" property="checkID"/>
+      <result column="patientID" property="patientID"/>
+      <result column="checkDate" property="checkDate"/> 
+      <result column="checkResult" property="checkResult"/>
+      <result column="isDelete" property="isDelete"/>
+
+
+     <!-- 多对一   property:属性名称 ；ofType:关联的对象； javaType：关联的对象类型
+		一个检查记录对应一个检查项目，一个检查项目对应多个检查记录-->
+     <association property="checkProject" javaType="CheckProject">
+         <id column="checkID" property="checkID"/>
+         
+         <result column="checkRecord" property="checkRecord"/>
+         <result column="checkAnalysis" property="checkAnalysis"/>
+         <result column="checkCharge" property="checkCharge"/>
+         <result column="checkName" property="checkName"/>
+         <result column="isDelete" property="isDelete"/>
+     </association>
+  
+     <!-- 一对多   ofType:关联的对象 
+     	一个检查项目对应一个病例，一个病例对应多个检验项目-->
+     <association property="patient" javaType="Patient">
+           <id column="patientID" property="patientID"/>
+           
+           <result column="patientName" property="patientName"/>
+           <result column="sex" property="sex"/>
+           <result column="birthday" property="birthday"/>
+           <result column="tel" property="tel"/>
+           <result column="isDelete" property="isDelete"/>
+     </association>
+   </resultMap>
+ 
+     <!-- 全查询   -->
+     <select id="query"  resultMap="resultCheckRecord">
+          SELECT r.*,c.*,p.*
+		    from CheckRecord r,CheckProject c,Patient p
+		       where p.patientID=r.patientID
+              		and r.checkID=c.checkID and r.isDelete=0
+     </select>
+     
+    <!-- 搜索框 -->
+    <select id="queryByCondition" parameterType="map" resultMap="resultCheckRecord" >
+    	SELECT r.*,c.*,p.* from CheckRecord r,CheckProject c,Patient p   where p.patientID=r.patientID and r.checkID=c.checkID 
+    				and r.isDelete=0 and p.isDelete=0 and c.isDelete=0
+
+	        <if test="checkCharge1 != null">
+	           <if test="checkCharge2 == null">
+	             	and c.checkCharge >= #{checkCharge1}
+	           </if>
+	           <if test="checkCharge2 != null">
+		            and c.checkCharge between #{checkCharge1} and #{checkCharge2}
+		        </if>
+	        </if>
+	        <if test="checkCharge1 == null and checkCharge2 != null">
+	        		and c.checkCharge between 0 and #{checkCharge2}
+	        </if>
+	        <if test="patientName != null and patientName != ''">
+	           		and p.patientName like concat('%',concat(#{patientName},'%'))
+	        </if>
+	        <if test="checkName != null and checkName != ''">
+	           		and c.checkName like concat('%',concat(#{checkName},'%'))
+	        </if>
+    
+    </select>
+     
+     
+
+    <!-- sendUpdate sendDelete 根据id查询对象 -->
+    <select id="findById" parameterType="Integer" resultType="CheckRecord">
+       select * from CheckRecord where checkRecordID=#{checkRecordID} and CheckRecord.isDelete=0
+    </select>
+    
+    
+    <!-- 修改 -->
+    <update id="update" parameterType="CheckRecord">
+         update CheckRecord set
+          <if test="checkRecordID != null and  checkRecordID !=''">
+              checkID=#{checkID},
+          </if>
+          <if test="patientID != null and  patientID !=''">
+              patientID=#{patientID},
+          </if>
+          <if test="checkDate != null and  checkDate !=''">
+          	  checkDate=#{checkDate},
+          </if>
+          <if test="checkResult != null and  checkResult !=''">
+		      checkResult=#{checkResult}
+		  </if>
+		  where checkRecordID=#{checkRecordID}
+    </update>
+    
+    
+    <!-- delete 删除（假删除，设置isDelete为1） -->
+    <update id="delete" parameterType="Integer">
+    	update CheckRecord set isDelete=1 where checkRecordID=#{checkRecordID}
+    </update>
+     
+
+    <!-- add 添加 -->
+    <insert id="add" parameterType="CheckRecord">     
+       insert into CheckRecord (checkID,patientID,checkDate,checkResult,isDelete) 
+  					values (#{checkID},#{patientID},#{checkDate},#{checkResult},#{isDelete})
+       
+         <!-- 返回自动增长后的主键   keyColumn：表中的字段名   keyProperty:类中的属性名
+          select  uuid()   resultType="String"
+           -->
+        <selectKey keyColumn="checkRecordID" keyProperty="checkRecordID" resultType="int">
+             SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert> 
+        
+    
+</mapper>
+

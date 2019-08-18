@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.RegistrationTypeDao">
+<resultMap id="BaseResultMap" type="com.web.entity.RegistrationType">
+    <id column="registrationTypeID" jdbcType="INTEGER" property="registrationTypeID" />
+    <result column="isDelete" jdbcType="INTEGER" property="isDelete" />
+    <result column="registrationTypeName" jdbcType="VARCHAR" property="registrationTypeName" />
+</resultMap>
+  
+ <insert id="insert" parameterType="RegistrationType">
+ 	insert into RegistrationType values(0,#{registrationTypeID},#{registrationTypeName})
+ </insert>
+ 
+ <select id="queryByCondition" resultMap="BaseResultMap" parameterType="RegistrationType">
+ 	select * from RegistrationType 
+ <where>
+ 	<if test="registrationTypeName!=null and registrationTypeName!=''">
+ 		 registrationTypeName like concat('%',concat(#{registrationTypeName},'%'))
+ 	</if>
+ 	and isDelete=0 
+ 	</where>
+ 	
+ </select>
+ 
+ <select id="findById" resultMap="BaseResultMap" parameterType="Integer">
+		select * from RegistrationType where registrationTypeID=#{registrationTypeID}
+  </select>
+  <select id="listRegistrationType" resultType="RegistrationType">
+  	select * from RegistrationType 
+  	
+  </select>
+  
+  
+  <update id="update" parameterType="RegistrationType">
+  	update RegistrationType set  
+  	<if test="registrationTypeName!=null and registrationTypeName!=''">
+    	registrationTypeName=#{registrationTypeName}
+    </if>
+    where registrationTypeID=#{registrationTypeID}
+  </update>
+  
+  <update id="delete" parameterType="RegistrationType">
+  	update RegistrationType set isDelete=1 where registrationTypeID=#{registrationTypeID}
+  </update>
+</mapper>

@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace:命名空间  -->
+<mapper namespace="com.web.dao.DoctorAdviceDao">
+
+	<resultMap type="DoctorAdvice" id="resultDoctorAdvice">
+		 <id column="willID" property="willID"/>
+	      <result column="isDelete" property="isDelete"/>
+	      <result column="userId" property="userId"/>
+	      <result column="patientHistoryID" property="patientHistoryID"/>
+	      <result column="patientID" property="patientID"/>
+	      <result column="startDate" property="startDate"/>
+	      <result column="endDate" property="endDate"/>
+	      <result column="doctorAdvice" property="doctorAdvice"/>
+	      <result column="illnessName" property="illnessName"/>
+	      <result column="flagOut" property="flagOut"/>
+		   <!--一对一   property:属性名称   javaType：关联的对象类型-->
+       <association property="patient" javaType="Patient">
+       <id column="patientID" property="patientID"/>
+       <result column="isDelete" property="isDelete"/>
+       <result column="patientName" property="patientName"/>
+       <result column="sex" property="sex"/>
+       <result column="birthday" property="birthday"/>
+       <result column="age" property="age"/>
+       <result column="occupation" property="occupation"/>
+       <result column="birthPlace" property="birthPlace"/>
+       <result column="nation" property="nation"/>
+       <result column="ID" property="ID"/>
+       <result column="nationality" property="nationality"/>
+       <result column="workPlace" property="workPlace"/>
+       <result column="tel" property="tel"/>
+       <result column="postCode" property="postCode"/>
+       <result column="permanentAddress" property="permanentAddress"/>
+       <result column="contactPersonName" property="contactPersonName"/>
+       <result column="contactPersonAddress" property="contactPersonAddress"/>
+       <result column="contactPersonRelationship" property="contactPersonRelationship"/>
+       <result column="contactPersonTel" property="contactPersonTel"/>
+       <result column="marrySituation" property="marrySituation"/>
+       </association>
+		
+		  
+       <!--一对一   property:属性名称   javaType：关联的对象类型-->
+       <association property="user" javaType="User">       
+       <id column="userId" property="userId" />
+	     <result column="poId" property="poId" />
+		 <result column="departmentID" property="departmentID" />
+		 <result column="userName" property="userName" />
+		 <result column="userPassword" property="userPassword" />
+		 <result column="userPhoto" property="userPhoto" />
+		 <result column="userSex" property="userSex" />
+		 <result column="userBirthday" property="userBirthday" />
+		 <result column="userCard" property="userCard" />
+		 <result column="userState" property="userState" />
+		 <result column="userDescribe" property="userDescribe" />
+		 <result column="marrySituation" property="marrySituation" />
+		 <result column="level" property="level" />
+		 <result column="birthPlace" property="birthPlace" />
+		 <result column="nation" property="nation" />
+		 <result column="country" property="country" />
+		 <result column="Telephone"  property="telephone" />
+		 <result column="Idplace" property="idplace" />
+		 <result column="isDelete" property="isDelete" />
+         </association>
+		
+		 <association property="patienthistory" javaType="PatientHistory"> 
+  	      <id column="patientHistoryID" property="patientHistoryID" />
+	      <result column="isDelete" property="isDelete" />
+	      <result column="userId" property="userId" />
+	      <result column="diagnosisDate" property="diagnosisDate" />
+	      <result column="patientHistoryRecord" property="patientHistoryRecord" />
+	      <result column="historytype" property="historytype" />
+          </association>
+		
+	</resultMap>
+	
+	
+	<!-- 自定义SQL语句，以便于其他地方重复使用 -->
+     <sql id="DoctorAdviceCondition">
+           <where>
+		          d.patientID = p.patientID and d.userId = u.userId and p_h.patientHistoryID = d.patientHistoryID and d.isDelete = 0
+				  <if test=" illnessName != null and illnessName !=''">
+				      and illnessName like concat('%',concat(#{illnessName},'%'))
+				  </if>
+				  <if test=" flagOut != null and flagOut !=''">
+				      and flagOut like concat('%',concat(#{flagOut},'%'))
+				  </if>
+				  <if test="patient.patientName !=null and patient.patientName !=''">
+				      and p.patientName like concat('%',concat(#{patient.patientName},'%'))
+				  </if>
+				  <if test="patienthistory.patientHistoryID !=null and patienthistory.patientHistoryID !=''">
+				      and p_h.patientHistoryID like concat('%',concat(#{patienthistory.patientHistoryID},'%'))
+				  </if>
+				  <if test="user.userName !=null and user.userName !=''">
+				      and u.userName like concat('%',concat(#{user.userName},'%'))
+				  </if>
+		    </where>
+	
+	     </sql>
+	
+	
+	<select id="selectByID" parameterType="Integer" resultType="DoctorAdvice">
+   		select * from DoctorAdvice where willID=#{willID}
+   </select>
+	
+	
+	
+	  <select id="selectByCondition" parameterType="DoctorAdvice" resultMap="resultDoctorAdvice">
+   		SELECT d.*, p.*,u.*
+		    from DoctorAdvice d, Patient p, User u, PatientHistory p_h
+		   <include refid="DoctorAdviceCondition"/>
+   </select>
+   
+	
+	
+    <!-- 修改 -->
+    <update id="update" parameterType="DoctorAdvice">
+         update DoctorAdvice set
+         <if test="userId !=null and userId !=''">
+             userId=#{userId},
+		 </if>
+         <if test="patientHistoryID !=null and patientHistoryID !=''">
+		     patientHistoryID=#{patientHistoryID},
+		 </if>
+		 <if test="patientID !=null and patientID !=''">
+		     patientID=#{patientID},
+		 </if>
+         <if test="startDate !=null and startDate !=''">
+		     startDate=#{startDate},
+		 </if>
+		 <if test="endDate !=null and endDate !=''">
+		     endDate=#{endDate},
+		 </if>
+		 <if test="doctorAdvice !=null and doctorAdvice !=''">
+		     doctorAdvice=#{doctorAdvice},
+		 </if>
+		 <if test="illnessName !=null and illnessName !=''">
+		     illnessName=#{illnessName},
+		 </if>
+		 <if test="flagOut !=null and flagOut !=''">
+		     flagOut=#{flagOut}
+		 </if>
+		  where willID=#{willID}
+    </update>
+	
+	 <!-- 删除 -->
+    <update id="delete">
+    update DoctorAdvice set
+    <if test="willID !=null and willID !=''">
+    	 isDelete = 1 
+    </if>
+    where willID=#{willID}
+    </update>
+	
+	 
+    <!-- 插入 -->
+    <insert id="insert" parameterType="DoctorAdvice">
+         <!-- 返回自动增长后的主键   keyColumn：表中的字段名   keyProperty:类中的属性名
+          select  uuid()   resultType="String"
+           
+        <selectKey keyColumn="patientID" keyProperty="patientID" resultType="int">
+             SELECT LAST_INSERT_ID()
+        </selectKey> -->
+        
+   		 insert into DoctorAdvice (willID, isDelete, userId, 
+      		patientHistoryID, patientID, startDate, 
+      		endDate, doctorAdvice, illnessName, 
+      		flagOut)
+   		 values (#{willID}, 0, #{userId}, 
+      		#{patientHistoryID}, #{patientID}, #{startDate}, 
+      		#{endDate}, #{doctorAdvice}, #{illnessName}, 
+      		#{flagOut})
+    </insert>
+
+	
+	
+</mapper>

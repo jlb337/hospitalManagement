@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace:命名空间  -->
+<mapper namespace="com.web.dao.InTestProjectDao">
+
+   <!-- 自定义结果集 -->
+   <resultMap type="InTestProject" id="resultInTestProject">
+   
+     <!-- 主键   column:表中的字段名称      property:类中的属性名称 -->
+      <id column="inTestID" property="inTestID"/>
+      
+      <result column="isDelete" property="isDelete"/>
+      <result column="patientID" property="patientID"/>
+      <result column="testName" property="testName"/>
+      <result column="testDate" property="testDate"/>
+      <result column="testLeader" property="testLeader"/>
+      <result column="testContent" property="testContent"/>
+      <result column="testResult" property="testResult"/>
+      <result column="testCost" property="testCost"/>
+
+   <!-- 多对一   property:属性名称   javaType：关联的对象类型-->
+     <association property="patient" javaType="Patient">
+         <id column="patientID" property="patientID"/>
+           
+          <result column="patientName" property="patientName"/>
+          <result column="sex" property="sex"/>
+          <result column="ID" property="ID"/>
+     </association>
+     
+  </resultMap>
+        
+     <!-- 自定义SQL语句，以便于其他地方重复使用 -->
+     <sql id="InTestProjectCondition">
+           <where>
+		          i.patientID = p.patientID
+		          and p.isDelete = 0
+		          and i.isDelete = 0
+				 <if test="testCost1 != null">
+		            <if test="testCost2 == null">
+		             	and i.testCost >= #{testCost1}
+		            </if>
+		            
+		            <if test="testCost2 != null">
+			            and i.testCost between #{testCost1} and #{testCost2}
+			        </if>
+	        	</if>
+	        	
+		        <if test="testCost1 == null and testCost2 != null">
+		        		and i.testCost between 0 and #{testCost2}
+		        </if>
+		        
+				 <if test="testName!=null and  testName!=''">
+				       and i.testName like concat('%',concat(#{testName},'%'))
+				 </if>
+			 	
+			 	<if test="patient.patientName!=null and  patient.patientName!=''">
+				       and p.patientName like concat('%',concat(#{patient.patientName},'%'))
+				 </if>				 
+				 
+				 <if test="patient.ID!=null and  patient.ID!=''">
+				       and p.ID like concat('%',concat(#{patient.ID},'%'))
+				 </if>
+				 
+		    </where>
+     </sql>
+
+
+    <select id="queryByCondition" resultMap="resultInTestProject" parameterType="InTestProject">
+            SELECT i.*,p.*
+		    from InTestProject i,Patient p
+		   <include refid="InTestProjectCondition"/>
+    </select>
+    
+    
+     <update id="update" parameterType="InTestProject">
+         update InTestProject set
+         <if test="testName != null">
+			testName = #{testName},
+		   </if>
+		   <if test="patientID != null">
+			patientID = #{patientID},
+		   </if>
+		   <if test="testDate != null">
+			testDate = #{testDate},
+		   </if>
+		   <if test="testLeader != null">
+			testLeader=#{testLeader},
+		   </if>
+		   <if test="testContent != null">
+			testContent=#{testContent},
+		   </if>
+		   <if test="testResult != null">
+			testResult=#{testResult},
+		   </if>
+		   <if test="testCost != null">
+			testCost=#{testCost}
+		   </if>
+          
+		  where inTestID=#{inTestID}
+    </update>
+    
+     <select id="queryById" parameterType="Integer" resultMap="resultInTestProject" >
+           SELECT i.*,p.*
+		    from InTestProject i,Patient p
+		    <where>
+		          and i.patientID = p.patientID
+		          and p.isDelete = 0
+		          and i.isDelete = 0
+		          and i.inTestID = #{inTestID}
+		    </where>
+    </select>
+    
+    <update id="delete" parameterType="Integer">
+         update InTestProject set
+          isDelete = 1
+		  where inTestID=#{inTestID}
+    </update>
+    
+    <insert id="add" parameterType="InTestProject">
+    	insert into InTestProject (isDelete,testName,patientID,testDate,testLeader,testContent,testResult,testCost) 
+    	values (0,#{testName},#{patientID},#{testDate},#{testLeader},#{testContent},#{testResult},#{testCost});
+    </insert>
+    
+</mapper>
+

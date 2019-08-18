@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace:命名空间  -->
+<mapper namespace="com.web.dao.OperationRoomDao">
+
+   <!-- 自定义结果集 -->
+   <resultMap type="OperationRoom" id="resultOperationRoom">
+   
+     <!-- 主键   column:表中的字段名称      property:类中的属性名称 -->
+      <id column="operationRoomID" property="operationRoomID"/>
+      
+      <result column="userId" property="userId"/>
+      <result column="operationRoomAddress" property="operationRoomAddress"/>
+      <result column="operationDescrip" property="operationDescrip"/> 
+      <result column="isDelete" property="isDelete"/>
+
+
+     <!-- 多对一   property:属性名称 ；ofType:关联的对象； javaType：关联的对象类型
+		一个手术室对应一个用户，一个用户对应多个手术室-->
+     <association property="user" javaType="User">
+         <id column="userId" property="userId"/>
+         
+         <result column="userName" property="userName"/>
+         <result column="poId" property="poId"/>
+         <result column="departmentID" property="departmentID"/>
+         <result column="userSex" property="userSex"/>
+         <result column="isDelete" property="isDelete"/>
+     </association>
+  
+   </resultMap>
+ 
+     <!-- 全查询   -->
+     <select id="query"  resultMap="resultOperationRoom">
+          SELECT o.*,u.*
+		    from OperationRoom o,User u
+		       where o.userId=u.userId and o.isDelete=0
+     </select>
+     
+    <!-- 搜索框 -->
+    <select id="queryByCondition" parameterType="OperationRoom" resultMap="resultOperationRoom" >
+    	SELECT o.*,u.* from OperationRoom o,User u
+		       where o.userId=u.userId and o.isDelete=0 and u.isDelete=0
+
+	        <if test="user.userName != null and user.userName != ''">
+	           		and u.userName like concat('%',concat(#{user.userName},'%'))
+	        </if>
+	        <if test="operationRoomAddress != null and operationRoomAddress != ''">
+	           		and o.operationRoomAddress like concat('%',concat(#{operationRoomAddress},'%'))
+	        </if>
+    
+    </select>
+     
+     
+
+    <!-- sendUpdate sendDelete 根据id查询对象 -->
+    <select id="findById" parameterType="Integer" resultType="OperationRoom">
+       select * from OperationRoom where operationRoomID=#{operationRoomID} and OperationRoom.isDelete=0
+    </select>
+    
+    
+    <!-- 修改 -->
+    <update id="update" parameterType="OperationRoom">
+         update OperationRoom set
+          <if test="userId != null and  userId !=''">
+              userId=#{userId},
+          </if>
+          <if test="operationRoomAddress != null and  operationRoomAddress !=''">
+              operationRoomAddress=#{operationRoomAddress}
+          </if>
+		  where operationRoomID=#{operationRoomID}
+    </update>
+    
+    
+    <!-- delete 删除（假删除，设置isDelete为1） -->
+    <update id="delete" parameterType="Integer">
+    	update OperationRoom set isDelete=1 where operationRoomID=#{operationRoomID}
+    </update>
+     
+
+    <!-- add 添加 -->
+    <insert id="add" parameterType="OperationRoom">     
+       insert into OperationRoom (userId,operationRoomAddress,operationDescrip,isDelete) 
+  					values (#{userId},#{operationRoomAddress},#{operationDescrip},#{isDelete})
+       
+         <!-- 返回自动增长后的主键   keyColumn：表中的字段名   keyProperty:类中的属性名
+          select  uuid()   resultType="String"
+           -->
+        <selectKey keyColumn="operationRoomID" keyProperty="operationRoomID" resultType="int">
+             SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert> 
+        
+    
+</mapper>
+

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace:命名空间  -->
+<mapper namespace="com.web.dao.OrderDetailDao">
+
+   <!-- 自定义结果集 -->
+   <resultMap type="OrderDetail" id="resultOrderDetail">
+   
+     <!-- 主键   column:表中的字段名称      property:类中的属性名称 -->
+      <id column="detailID" property="detailID"/>
+      
+      <result column="drugOrderID" property="drugOrderID"/>
+      <result column="number" property="number"/>
+      <result column="sumCost" property="sumCost"/>
+      <result column="batchNumber" property="batchNumber"/>
+      <result column="isDelete" property="isDelete"/>
+
+
+     <!-- 多对一   property:属性名称 ；ofType:关联的对象； javaType：关联的对象类型
+		一个订单细则对应一个订单，一个订单对应多个订单细则-->
+     <association property="drugOrder" javaType="DrugOrder">
+         <id column="drugOrderID" property="drugOrderID"/>
+         
+         <result column="userId" property="userId"/>
+         <result column="standard" property="standard"/>
+         <result column="orderDate" property="orderDate"/>
+         <result column="commitDate" property="commitDate"/>
+     </association>
+  
+   </resultMap>
+ 
+     <!-- 全查询   -->
+     <select id="query"  resultMap="resultOrderDetail">
+          SELECT o.*,d.*
+		    from OrderDetail o,DrugOrder d
+		       where o.drugOrderID=d.drugOrderID and o.isDelete=0
+     </select>
+     
+    <!-- 搜索框 -->
+    <select id="queryByCondition" parameterType="map" resultMap="resultOrderDetail" >
+    	SELECT o.*,d.* from OrderDetail o,DrugOrder d
+		       where o.drugOrderID=d.drugOrderID and o.isDelete=0 and d.isDelete=0
+
+	        <if test="sumCost1 != null">
+	           <if test="sumCost2 == null">
+	             	and o.sumCost >= #{sumCost1}
+	           </if>
+	           <if test="sumCost2 != null">
+		            and o.sumCost between #{sumCost1} and #{sumCost2}
+		       </if>
+	        </if>
+	        <if test="sumCost1 == null and sumCost2 != null">
+	        		and o.sumCost between 0 and #{sumCost2}
+	        </if>
+	        <if test="batchNumber != null and batchNumber != ''">
+	           		and o.batchNumber like concat('%',concat(#{batchNumber},'%'))
+	        </if>
+	        <if test="drugOrderID != null and drugOrderID != ''">
+	           		and o.drugOrderID = #{drugOrderID}
+	        </if>
+    
+    </select>
+     
+     
+
+    <!-- sendUpdate sendDelete 根据id查询对象 -->
+    <select id="findById" parameterType="Integer" resultType="OrderDetail">
+       select * from OrderDetail where detailID=#{detailID} and OrderDetail.isDelete=0
+    </select>
+    
+    
+    <!-- 修改 -->
+    <update id="update" parameterType="OrderDetail">
+         update OrderDetail set
+          <if test="drugOrderID != null and  drugOrderID !=''">
+              drugOrderID=#{drugOrderID},
+          </if>
+          <if test="number != null and  number !=''">
+              number=#{number},
+          </if>
+          <if test="sumCost != null and  sumCost !=''">
+              sumCost=#{sumCost},
+          </if>
+          <if test="batchNumber != null and  batchNumber !=''">
+              batchNumber=#{batchNumber}
+          </if>
+		  where detailID=#{detailID}
+    </update>
+    
+    
+    <!-- delete 删除（假删除，设置isDelete为1） -->
+    <update id="delete" parameterType="Integer">
+    	update OrderDetail set isDelete=1 where detailID=#{detailID}
+    </update>
+     
+
+    <!-- add 添加 -->
+    <insert id="add" parameterType="OrderDetail">     
+       insert into OrderDetail (drugOrderID,number,sumCost,batchNumber,isDelete) 
+  					values (#{drugOrderID},#{number},#{sumCost},#{batchNumber},#{isDelete})
+       
+         <!-- 返回自动增长后的主键   keyColumn：表中的字段名   keyProperty:类中的属性名
+          select  uuid()   resultType="String"
+           -->
+        <selectKey keyColumn="detailID" keyProperty="detailID" resultType="int">
+             SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert> 
+  
+ 
+    
+</mapper>
+

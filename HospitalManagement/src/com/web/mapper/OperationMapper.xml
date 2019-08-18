@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace:命名空间  -->
+<mapper namespace="com.web.dao.OperationDao">
+
+   <!-- 自定义结果集 -->
+   <resultMap type="Operation" id="resultOperation">
+   
+     <!-- 主键   column:表中的字段名称      property:类中的属性名称 -->
+      <id column="operationID" property="operationID"/>
+      
+      <result column="patientID" property="patientID"/>
+      <result column="operationName" property="operationName"/>
+      <result column="sleepMethod" property="sleepMethod"/>
+      <result column="operationDate" property="operationDate"/>
+      <result column="operationResult" property="operationResult"/>
+      <result column="operationCost" property="operationCost"/>
+      <result column="isDelete" property="isDelete"/>
+
+
+     <!-- 多对一   property:属性名称 ；ofType:关联的对象； javaType：关联的对象类型
+		一个手术对应一个病人，一个病人对应多个手术-->
+     <association property="patient" javaType="Patient">
+         <id column="patientID" property="patientID"/>
+         
+         <result column="patientName" property="patientName"/>
+         <result column="sex" property="sex"/>
+         <result column="birthday" property="birthday"/>
+         <result column="ID" property="ID"/>
+         <result column="tel" property="tel"/>
+         <result column="isDelete" property="isDelete"/>
+     </association>
+  
+   </resultMap>
+ 
+     <!-- 全查询   -->
+     <select id="query"  resultMap="resultOperation">
+          SELECT o.*,p.*
+		    from Operation o,Patient p
+		       where o.patientID=p.patientID and o.isDelete=0
+     </select>
+     
+    <!-- 搜索框 -->
+    <select id="queryByCondition" parameterType="map" resultMap="resultOperation" >
+    	SELECT o.*,p.* from Operation o,Patient p
+		       where o.patientID=p.patientID and o.isDelete=0 and p.isDelete=0
+
+	        <if test="operationCost1 != null">
+	           <if test="operationCost2 == null">
+	             	and o.operationCost >= #{operationCost1}
+	           </if>
+	           <if test="operationCost2 != null">
+		            and o.operationCost between #{operationCost1} and #{operationCost2}
+		       </if>
+	        </if>
+	        <if test="operationCost1 == null and operationCost2 != null">
+	        		and o.operationCost between 0 and #{operationCost2}
+	        </if>
+	        <if test="patientName != null and patientName != ''">
+	           		and p.patientName like concat('%',concat(#{patientName},'%'))
+	        </if>
+	        <if test="operationName != null and operationName != ''">
+	           		and o.operationName like concat('%',concat(#{operationName},'%'))
+	        </if>
+    
+    </select>
+     
+     
+
+    <!-- sendUpdate sendDelete 根据id查询对象 -->
+    <select id="findById" parameterType="Integer" resultType="Operation">
+       select * from Operation where operationID=#{operationID} and Operation.isDelete=0
+    </select>
+    
+    
+    <!-- 修改 -->
+    <update id="update" parameterType="Operation">
+         update Operation set
+          <if test="patientID != null and  patientID !=''">
+              patientID=#{patientID},
+          </if>
+          <if test="operationDate != null and  operationDate !=''">
+              operationDate=#{operationDate},
+          </if>
+          <if test="operationResult != null and  operationResult !=''">
+              operationResult=#{operationResult},
+          </if>
+          <if test="operationCost != null and  operationCost !=''">
+              operationCost=#{operationCost}
+          </if>
+		  where operationID=#{operationID}
+    </update>
+    
+    
+    <!-- delete 删除（假删除，设置isDelete为1） -->
+    <update id="delete" parameterType="Integer">
+    	update Operation set isDelete=1 where operationID=#{operationID}
+    </update>
+     
+
+    <!-- add 添加 -->
+    <insert id="add" parameterType="Operation">     
+       insert into Operation (patientID,operationName,sleepMethod,hurtSituation,operationDate,
+       							operationPersistentTime,operationResult,operationCost,isDelete) 
+  					values (#{patientID},#{operationName},#{sleepMethod},#{hurtSituation},#{operationDate},
+  								#{operationPersistentTime},#{operationResult},#{operationCost},#{isDelete})
+       
+         <!-- 返回自动增长后的主键   keyColumn：表中的字段名   keyProperty:类中的属性名
+          select  uuid()   resultType="String"
+           -->
+        <selectKey keyColumn="operationID" keyProperty="operationID" resultType="int">
+             SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert> 
+  
+ 
+    
+</mapper>
+

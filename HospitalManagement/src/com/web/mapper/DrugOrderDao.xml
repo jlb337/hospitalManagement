@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.DrugOrderDao">
+  <resultMap id="BaseResultMap" type="com.web.entity.DrugOrder">
+    <id column="drugOrderID" jdbcType="INTEGER" property="drugOrderID" />
+    <result column="isDelete" jdbcType="INTEGER" property="isDelete" />
+    <result column="userId" jdbcType="INTEGER" property="userId" />
+    <result column="standard" jdbcType="VARCHAR" property="standard" />
+    <result column="orderDate" jdbcType="TIMESTAMP" property="orderDate" />
+    <result column="commitDate" jdbcType="TIMESTAMP" property="commitDate" />
+  </resultMap>
+  
+   <!-- 自定义结果集 -->
+   <resultMap type="com.web.entity.DrugOrder" id="resultDrugOrder">
+       <!-- 主键 -->
+       <id column="drugOrderID" jdbcType="INTEGER" property="drugOrderID" />
+	    <result column="isDelete" jdbcType="INTEGER" property="isDelete" />
+	    <result column="userId" jdbcType="INTEGER" property="userId" />
+	    <result column="standard" jdbcType="VARCHAR" property="standard" />
+	    <result column="orderDate" jdbcType="TIMESTAMP" property="orderDate" />
+	    <result column="commitDate" jdbcType="TIMESTAMP" property="commitDate" />
+       <!-- 多对一 -->
+       <association property="user" javaType="User">
+	    <id column="userId" jdbcType="INTEGER" property="userId" />
+    <result column="poId" jdbcType="INTEGER" property="poId" />
+    <result column="departmentID" jdbcType="INTEGER" property="departmentID" />
+    <result column="userName" jdbcType="VARCHAR" property="userName" />
+    <result column="userPassword" jdbcType="VARCHAR" property="userPassword" />
+    <result column="userPhoto" jdbcType="VARCHAR" property="userPhoto" />
+    <result column="userSex" jdbcType="VARCHAR" property="userSex" />
+    <result column="userBirthday" jdbcType="DATE" property="userBirthday" />
+    <result column="userCard" jdbcType="VARCHAR" property="userCard" />
+    <result column="userState" jdbcType="INTEGER" property="userState" />
+    <result column="userDescribe" jdbcType="VARCHAR" property="userDescribe" />
+    <result column="marrySituation" jdbcType="VARCHAR" property="marrySituation" />
+    <result column="level" jdbcType="VARCHAR" property="level" />
+    <result column="birthPlace" jdbcType="VARCHAR" property="birthPlace" />
+    <result column="nation" jdbcType="VARCHAR" property="nation" />
+    <result column="country" jdbcType="VARCHAR" property="country" />
+    <result column="Telephone" jdbcType="VARCHAR" property="telephone" />
+    <result column="Idplace" jdbcType="VARCHAR" property="idplace" />
+    <result column="isDelete" jdbcType="INTEGER" property="isDelete" />
+       </association>
+   </resultMap>
+   <!-- 查询 -->
+   <select id="queryByCondition" resultMap="resultDrugOrder">
+       SELECT do.*,u.*
+		    from DrugOrder do,User u
+		       where do.userId=u.userId
+		       and (do.isDelete=0 or do.isDelete is null)
+		       <include refid="conditionSql"></include>
+   </select>
+  <sql id="conditionSql">
+        <if test="drugOrderID !=null and drugOrderID !=''">
+           and do.drugOrderID=#{drugOrderID}
+        </if>
+        <if test="userId !=null and userId !=''">
+           and do.userId=#{userId}
+        </if>
+        <if test="standard !=null and standard !=''">
+           and do.standard=#{standard}
+        </if>
+        <if test="orderDate !=null and orderDate !=''">
+           and do.orderDate=#{orderDate}
+        </if>
+        <if test="commitDate !=null and commitDate !=''">
+           and do.commitDate=#{commitDate}
+        </if>
+        
+        
+   </sql>
+  
+  
+  
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    drugOrderID, isDelete, userId, standard, orderDate, commitDate
+  </sql>
+  <select id="selectByExample" parameterType="com.web.entity.DrugOrderExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from DrugOrder
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from DrugOrder
+    where drugOrderID = #{drugOrderID,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from DrugOrder
+    where drugOrderID = #{drugOrderID,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.web.entity.DrugOrderExample">
+    delete from DrugOrder
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.web.entity.DrugOrder">
+    insert into DrugOrder (drugOrderID, isDelete, userId, 
+      standard, orderDate, commitDate
+      )
+    values (#{drugOrderID,jdbcType=INTEGER}, #{isDelete,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, 
+      #{standard,jdbcType=VARCHAR}, #{orderDate,jdbcType=TIMESTAMP}, #{commitDate,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.web.entity.DrugOrder">
+    insert into DrugOrder
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="drugOrderID != null">
+        drugOrderID,
+      </if>
+      <if test="isDelete != null">
+        isDelete,
+      </if>
+      <if test="userId != null">
+        userId,
+      </if>
+      <if test="standard != null">
+        standard,
+      </if>
+      <if test="orderDate != null">
+        orderDate,
+      </if>
+      <if test="commitDate != null">
+        commitDate,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="drugOrderID != null">
+        #{drugOrderID,jdbcType=INTEGER},
+      </if>
+      <if test="isDelete != null">
+        #{isDelete,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="standard != null">
+        #{standard,jdbcType=VARCHAR},
+      </if>
+      <if test="orderDate != null">
+        #{orderDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="commitDate != null">
+        #{commitDate,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.web.entity.DrugOrderExample" resultType="java.lang.Long">
+    select count(*) from DrugOrder
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update DrugOrder
+    <set>
+      <if test="record.drugOrderID != null">
+        drugOrderID = #{record.drugOrderID,jdbcType=INTEGER},
+      </if>
+      <if test="record.isDelete != null">
+        isDelete = #{record.isDelete,jdbcType=INTEGER},
+      </if>
+      <if test="record.userId != null">
+        userId = #{record.userId,jdbcType=INTEGER},
+      </if>
+      <if test="record.standard != null">
+        standard = #{record.standard,jdbcType=VARCHAR},
+      </if>
+      <if test="record.orderDate != null">
+        orderDate = #{record.orderDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.commitDate != null">
+        commitDate = #{record.commitDate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update DrugOrder
+    set drugOrderID = #{record.drugOrderID,jdbcType=INTEGER},
+      isDelete = #{record.isDelete,jdbcType=INTEGER},
+      userId = #{record.userId,jdbcType=INTEGER},
+      standard = #{record.standard,jdbcType=VARCHAR},
+      orderDate = #{record.orderDate,jdbcType=TIMESTAMP},
+      commitDate = #{record.commitDate,jdbcType=TIMESTAMP}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.web.entity.DrugOrder">
+    update DrugOrder
+    <set>
+      <if test="isDelete != null">
+        isDelete = #{isDelete,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null">
+        userId = #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="standard != null">
+        standard = #{standard,jdbcType=VARCHAR},
+      </if>
+      <if test="orderDate != null">
+        orderDate = #{orderDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="commitDate != null">
+        commitDate = #{commitDate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where drugOrderID = #{drugOrderID,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.web.entity.DrugOrder">
+    update DrugOrder
+    set isDelete = #{isDelete,jdbcType=INTEGER},
+      userId = #{userId,jdbcType=INTEGER},
+      standard = #{standard,jdbcType=VARCHAR},
+      orderDate = #{orderDate,jdbcType=TIMESTAMP},
+      commitDate = #{commitDate,jdbcType=TIMESTAMP}
+    where drugOrderID = #{drugOrderID,jdbcType=INTEGER}
+  </update>
+  </mapper>

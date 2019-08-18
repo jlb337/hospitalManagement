@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace:命名空间  -->
+<mapper namespace="com.web.dao.TestProjectDao">
+
+   <!-- 自定义结果集 -->
+   <resultMap type="TestProject" id="resultTestProject">
+   
+     <!-- 主键   column:表中的字段名称      property:类中的属性名称 -->
+      <id column="testID" property="testID"/>
+      
+      <result column="patientHistoryID" property="patientHistoryID"/>
+      <result column="testDate" property="testDate"/>
+      <result column="testAnalysis" property="testAnalysis"/> 
+      <result column="userId" property="userId"/>
+      <result column="isDelete" property="isDelete"/>
+      <result column="testRecord" property="testRecord"/>
+      <result column="testResult" property="testResult"/>
+      <result column="testCharge" property="testCharge"/>
+
+
+     <!-- 多对一   property:属性名称 ；ofType:关联的对象； javaType：关联的对象类型
+		一个检验项目对应一个用户，一个用户对应多个检验项目-->
+     <association property="user" javaType="User">
+         <id column="userId" property="userId"/>
+         
+         <result column="userName" property="userName"/>
+         <result column="userSex" property="userSex"/>
+         <result column="userBirthday" property="userBirthday"/>
+         <result column="userCard" property="userCard"/>
+     </association>
+  
+     <!-- 一对多   ofType:关联的对象 
+     	一个检验项目对应一个病例，一个病例对应多个检验项目-->
+     <association property="patientHistory" javaType="PatientHistory">
+           <id column="patientHistoryID" property="patientHistoryID"/>
+           
+           <result column="userId" property="userId"/>
+           <result column="diagnosisDate" property="diagnosisDate"/>
+           <result column="patientHistoryRecord" property="patientHistoryRecord"/>
+           <result column="historytype" property="historytype"/>
+     </association>
+   </resultMap>
+ 
+     <!-- 查询   -->
+     <select id="query"  resultMap="resultTestProject">
+          SELECT p.*,t.*,u.*
+		    from PatientHistory p,TestProject t,User u
+		       where p.patientHistoryID=t.patientHistoryID
+              		and t.userId=u.userId and t.isDelete=0
+     </select>
+     
+    <!-- 搜索 
+    <if test="patientHistoryID != null and patientHistoryID !=''">
+	            and t.patientHistoryID=#{patientHistoryID}
+	        </if>
+    -->
+    <select id="queryByCondition" parameterType="map" resultMap="resultTestProject" >
+    	SELECT t.*,u.*,p.* from TestProject t,User u,PatientHistory p where t.userId=u.userId and p.patientHistoryID=t.patientHistoryID and t.isDelete=0
+	    	<if test="testResult != null and testResult != ''">
+	           and t.testResult like concat('%',concat(#{testResult},'%'))
+	        </if>
+	        <if test="testCharge1 != null">
+	           <if test="testCharge2 == null">
+	               and t.testCharge >= #{testCharge1}
+	           </if>
+	           <if test="testCharge2 != null">
+		           and t.testCharge between #{testCharge1} and #{testCharge2}
+		        </if>
+	        </if>
+	        <if test="testCharge1 == null and testCharge2 != null">
+	        		and t.testCharge between 0 and #{testCharge2}
+	        </if> 
+	        <if test="userName != null and userName !=''">
+	            and u.userName like concat('%',concat(#{userName},'%'))
+	        </if>
+    </select>
+     
+     
+     
+     
+   <!-- 根据id查询对象 -->
+    <select id="findById" parameterType="Integer" resultType="TestProject">
+       select * from TestProject where testID=#{testID}
+    </select>
+    
+    <!-- 修改 -->
+    <update id="update" parameterType="TestProject">
+         update TestProject set
+          <if test="userId != null and  userId !=''">
+		      userId=#{userId},
+		  </if>
+		  <if test="testDate != null and  testDate !=''">
+		      testDate=#{testDate},
+		  </if>
+		  <if test="testResult != null and  testResult !=''">
+             testResult=#{testResult},
+          </if>
+          <if test="testCharge != null and  testCharge !=''">
+             testCharge=#{testCharge}
+          </if>
+		  where testID=#{testID}
+    </update>
+    
+    <!-- 删除（假删除，设置isDelete为1） -->
+    <update id="delete" parameterType="Integer">
+    	update TestProject set isDelete=1 where testID=#{testID}
+    </update>
+    
+        <!-- 添加 -->
+    <insert id="add" parameterType="TestProject">     
+       insert into TestProject (userId,patientHistoryID,testDate,testAnalysis,
+  							testRecord,testResult,testCharge,isDelete) 
+  					values (#{userId},#{patientHistoryID},#{testDate},#{testAnalysis},
+  							#{testRecord},#{testResult},#{testCharge},#{isDelete})
+       
+         <!-- 返回自动增长后的主键   keyColumn：表中的字段名   keyProperty:类中的属性名
+          select  uuid()   resultType="String"
+           -->
+        <selectKey keyColumn="testID" keyProperty="testID" resultType="int">
+             SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert> 
+
+    
+</mapper>
+

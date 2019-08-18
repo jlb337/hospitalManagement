@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace:命名空间  -->
+<mapper namespace="com.web.dao.CheckProjectDao">
+
+     <!-- 查询   -->
+     <select id="query"  resultType="CheckProject">
+          SELECT * from CheckProject where CheckProject.isDelete=0
+     </select>
+     
+     
+    <!-- 搜索框 -->
+    <select id="queryByCondition" parameterType="map" resultType="CheckProject" >
+    	SELECT * from CheckProject  where CheckProject.isDelete=0 
+
+	        <if test="checkCharge1 != null">
+	           <if test="checkCharge2 == null">
+	             	and CheckProject.checkCharge >= #{checkCharge1}
+	           </if>
+	           <if test="checkCharge2 != null">
+		            and CheckProject.checkCharge between #{checkCharge1} and #{checkCharge2}
+		        </if>
+	        </if>
+	        <if test="checkCharge1 == null and checkCharge2 != null">
+	        		and CheckProject.checkCharge between 0 and #{checkCharge2}
+	        </if>
+	        <if test="checkName != null and checkName != ''">
+	           		and CheckProject.checkName like concat('%',concat(#{checkName},'%'))
+	        </if>
+    </select>
+     
+     
+
+    <!-- sendUpdate sendDelete 根据id查询对象 -->
+    <select id="findById" parameterType="Integer" resultType="CheckProject">
+       select * from CheckProject where checkID=#{checkID} and CheckProject.isDelete=0
+    </select>
+    
+    
+    <!-- 修改 -->
+    <update id="update" parameterType="CheckProject">
+         update CheckProject set
+          <if test="checkName != null and  checkName !=''">
+              checkName=#{checkName},
+          </if>
+          <if test="checkCharge != null and  checkCharge !=''">
+              checkCharge=#{checkCharge}
+          </if>
+		  where checkID=#{checkID}
+    </update>
+    
+    
+    <!-- delete 删除（假删除，设置isDelete为1） -->
+    <update id="delete" parameterType="Integer">
+    	update CheckProject set isDelete=1 where checkID=#{checkID}
+    </update>
+     
+
+    <!-- add 添加 -->
+    <insert id="add" parameterType="CheckProject">     
+       insert into CheckProject (checkName,checkRecord,checkAnalysis,checkCharge,isDelete) 
+  					values (#{checkName},#{checkRecord},#{checkAnalysis},#{checkCharge},#{isDelete})
+       
+         <!-- 返回自动增长后的主键   keyColumn：表中的字段名   keyProperty:类中的属性名
+          select  uuid()   resultType="String"
+           -->
+        <selectKey keyColumn="checkID" keyProperty="checkID" resultType="int">
+             SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert> 
+    
+</mapper>
+

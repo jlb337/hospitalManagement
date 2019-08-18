@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace:命名空间  -->
+<mapper namespace="com.web.dao.SupplierDao">
+
+
+
+
+   <!-- 自定义结果集 -->
+   <resultMap type="Supplier" id="resultSupplier">
+   
+      <!-- 主键   column:表中的字段名称      property:类中的属性名称 -->
+      <id column="supplierID" property="supplierID"/>
+      
+      <result column="isDelete" property="isDelete"/>
+      <result column="supplierAddress" property="supplierAddress"/>
+      <result column="supplierTel" property="supplierTel"/>
+      <result column="supplierReditStatus" property="supplierReditStatus"/>
+   </resultMap>
+   
+
+
+     <!-- 自定义SQL语句，以便于其他地方重复使用 -->
+     <sql id="SupplierCondition">
+           <where>
+           isDelete = 0	
+				  <if test=" supplierTel != null and supplierTel !=''">
+				      and supplierTel like concat('%',concat(#{supplierTel},'%'))
+				  </if>
+				  <if test=" supplierReditStatus != null and supplierReditStatus !=''">
+				      and supplierReditStatus like concat('%',concat(#{supplierReditStatus},'%'))
+				  </if>
+				  <if test=" supplierAddress != null and supplierAddress !=''">
+				      and supplierAddress like concat('%',concat(#{supplierAddress},'%'))
+				  </if>
+		    </where>
+     </sql>
+   
+   
+
+   <select id="query" resultType="Supplier">
+   		select * from Supplier
+   </select>
+   
+   
+   
+   <select id="selectByID" parameterType="Integer" resultType="Supplier">
+   		select * from Supplier where supplierID=#{supplierID}
+   </select>
+   
+   
+   
+   <select id="selectByCondition" parameterType="Supplier" resultMap="resultSupplier">
+   		SELECT s.*
+		    from Supplier s
+		   <include refid="SupplierCondition"/>
+   </select>
+   
+   
+    <!-- 修改 -->
+    <update id="update" parameterType="Supplier">
+         update Supplier set
+         <if test="supplierAddress !=null and supplierAddress !=''">
+             supplierAddress=#{supplierAddress},
+		 </if>
+         <if test="supplierTel !=null and supplierTel !=''">
+		     supplierTel=#{supplierTel},
+		 </if>
+		 <if test="supplierReditStatus !=null and supplierReditStatus !=''">
+		     supplierReditStatus=#{supplierReditStatus}
+		 </if>
+		  where supplierID=#{supplierID}
+    </update>
+    
+    
+    <!-- 删除 -->
+    <update id="delete">
+    update Supplier set
+    <if test="supplierID !=null and supplierID !=''">
+    	 isDelete = 1 
+    </if>
+    where supplierID=#{supplierID}
+    </update>
+    
+    <!-- 插入 -->
+    <insert id="insert" parameterType="Supplier">
+         <!-- 返回自动增长后的主键   keyColumn：表中的字段名   keyProperty:类中的属性名
+          select  uuid()   resultType="String"
+           
+        <selectKey keyColumn="patientID" keyProperty="patientID" resultType="int">
+             SELECT LAST_INSERT_ID()
+        </selectKey> -->
+        
+       insert into Supplier 
+       (supplierID,isDelete,supplierAddress,supplierTel,supplierReditStatus)
+       values(#{supplierID},0,#{supplierAddress},#{supplierTel},#{supplierReditStatus})
+    </insert>
+
+
+
+</mapper>

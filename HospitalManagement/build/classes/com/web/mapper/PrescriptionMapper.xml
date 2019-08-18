@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace:命名空间  -->
+<mapper namespace="com.web.dao.PrescriptionDao">
+
+
+  <!-- 自定义结果集 -->
+   <resultMap type="Prescription" id="resultPrescription">
+   
+     <!-- 主键   column:表中的字段名称      property:类中的属性名称 -->
+      <id column="prescriptionID2" property="prescriptionID2"/>
+      
+      <result column="isDelete" property="isDelete"/>
+      <result column="patientID" property="patientID"/>
+      <result column="prescriptionContent" property="prescriptionContent"/>
+      <result column="note" property="note"/>
+      <result column="prescriptionDate" property="prescriptionDate"/>
+      <result column="prescriptionCost" property="prescriptionCost"/>
+            
+            
+      <association property="patient" javaType="Patient">      
+      <result column="isDelete" property="isDelete"/>
+      <result column="patientName" property="patientName"/>
+      <result column="sex" property="sex"/>
+      <result column="birthday" property="birthday"/>
+      <result column="age" property="age"/>
+      <result column="occupation" property="occupation"/>
+      <result column="birthPlace" property="birthPlace"/>
+      <result column="nation" property="nation"/>
+      <result column="ID" property="ID"/>
+      <result column="nationality" property="nationality"/>
+      <result column="workPlace" property="workPlace"/>
+      <result column="tel" property="tel"/>
+      <result column="postCode" property="postCode"/>
+      <result column="permanentAddress" property="permanentAddress"/>
+      <result column="contactPersonName" property="contactPersonName"/>
+      <result column="contactPersonAddress" property="contactPersonAddress"/>
+      <result column="contactPersonRelationship" property="contactPersonRelationship"/>
+      <result column="contactPersonTel" property="contactPersonTel"/>
+      <result column="marrySituation" property="marrySituation"/>
+      </association>
+   </resultMap>
+   
+   
+   
+        <!-- 自定义SQL语句，以便于其他地方重复使用 -->
+     <sql id="PrescriptionCondition">
+           <where>
+		         ps.patientID = p.patientID and ps.isDelete = 0
+				  <if test="prescriptionDate !=null and prescriptionDate !=''">
+				      and prescriptionDate like concat('%',concat(#{prescriptionDate},'%'))
+				  </if>
+				  <if test="prescriptionContent !=null and prescriptionContent != ''">
+				      and prescriptionContent like concat('%',concat(#{prescriptionContent},'%'))
+				  </if>
+				  
+				  <if test=" prescriptionCost1 != null">
+	           		  <if test="prescriptionCost2 == null">
+	             			and prescriptionCost >= #{prescriptionCost1}
+	           		  </if>
+	           		  <if test=" prescriptionCost2 !=null">
+		           			and prescriptionCost between #{prescriptionCost1} and #{prescriptionCost2}
+		        	  </if>
+        		  </if>
+				  
+				  <if test="patient.patientName !=null and patient.patientName !=''">
+				      and p.patientName like concat('%',concat(#{patient.patientName},'%'))
+				  </if>
+		    </where>
+     </sql>
+   
+   
+   
+
+
+   
+	<select id="query" resultType="Prescription">
+		select * from Prescription
+	</select>
+
+   
+   
+   
+   <select id="selectByID" parameterType="Integer" resultType="Prescription">
+   		select * from Prescription where prescriptionID2=#{prescriptionID2}
+   </select>
+   
+   
+   
+   <select id="selectByCondition" parameterType="map" resultMap="resultPrescription">
+   		SELECT ps.*, p.*
+		    from Prescription ps, Patient p
+		   <include refid="PrescriptionCondition"/>
+   </select>
+   
+   
+    <!-- 修改 -->
+    <update id="update" parameterType="Prescription">
+         update Prescription set
+         <if test="patientID !=null and patientID !=''">
+		     patientID=#{patientID},
+		 </if>
+		 <if test="prescriptionContent !=null and prescriptionContent !=''">
+		     prescriptionContent=#{prescriptionContent},
+		 </if>
+         <if test="note !=null and note !=''">
+		     note=#{note},
+		 </if>
+		 <if test="prescriptionDate !=null and prescriptionDate !=''">
+		     prescriptionDate=#{prescriptionDate},
+		 </if>
+		 <if test="prescriptionCost !=null and prescriptionCost !=''">
+		     prescriptionCost=#{prescriptionCost},
+		 </if>
+		  where prescriptionID2=#{prescriptionID2}
+    </update>
+    
+    
+    <!-- 删除 -->
+    <update id="delete">
+    update Prescription set
+    <if test="prescriptionID2 !=null and prescriptionID2 !=''">
+    	 isDelete = 1 
+    </if>
+    where prescriptionID2=#{prescriptionID2}
+    </update>
+    
+    <!-- 插入 -->
+    <insert id="insert" parameterType="Prescription">
+         <!-- 返回自动增长后的主键   keyColumn：表中的字段名   keyProperty:类中的属性名
+          select  uuid()   resultType="String"
+        <selectKey keyColumn="drugID" keyProperty="drugID" resultType="int">
+             SELECT LAST_INSERT_ID()
+        </selectKey>
+           -->
+        
+       insert into Prescription (prescriptionID2,isDelete,patientID,prescriptionContent,note,
+       prescriptionDate,prescriptionCost)
+       values (#{prescriptionID2},0,#{patientID},#{prescriptionContent},#{note},
+       #{prescriptionDate},#{prescriptionCost})
+    </insert>
+
+</mapper>

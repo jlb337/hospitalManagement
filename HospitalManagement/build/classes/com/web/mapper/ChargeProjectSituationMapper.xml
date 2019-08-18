@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace:命名空间  -->
+<mapper namespace="com.web.dao.ChargeProjectSituationDao">
+
+   <!-- 自定义结果集 -->
+   <resultMap type="ChargeProjectSituation" id="resultChargeProjectSituation">
+   
+     <!-- 主键   column:表中的字段名称      property:类中的属性名称 -->
+      <id column="chargeID" property="chargeID"/>
+      
+      <result column="patientID" property="patientID"/>
+      <result column="chargeType" property="chargeType"/>
+      <result column="chargeTypeMoney" property="chargeTypeMoney"/>
+      <result column="flagCheckOut" property="flagCheckOut"/>
+      <result column="flagTransfer" property="flagTransfer"/>
+      <result column="isDelete" property="isDelete"/>
+
+            
+      <!--一对一   property:属性名称   javaType：关联的对象类型-->
+      <association property="patient" javaType="Patient">
+      <id column="patientID" property="patientID"/>
+         
+      <result column="isDelete" property="isDelete"/>
+      <result column="patientName" property="patientName"/>
+      <result column="sex" property="sex"/>
+      <result column="birthday" property="birthday"/>
+      <result column="age" property="age"/>
+      <result column="occupation" property="occupation"/>
+      <result column="birthPlace" property="birthPlace"/>
+      <result column="nation" property="nation"/>
+      <result column="ID" property="ID"/>
+      <result column="nationality" property="nationality"/>
+      <result column="workPlace" property="workPlace"/>
+      <result column="tel" property="tel"/>
+      <result column="postCode" property="postCode"/>
+      <result column="permanentAddress" property="permanentAddress"/>
+      <result column="contactPersonName" property="contactPersonName"/>
+      <result column="contactPersonAddress" property="contactPersonAddress"/>
+      <result column="contactPersonRelationship" property="contactPersonRelationship"/>
+      <result column="contactPersonTel" property="contactPersonTel"/>
+      <result column="marrySituation" property="marrySituation"/>
+     </association>
+     
+   </resultMap>
+   
+   
+   
+        <!-- 自定义SQL语句，以便于其他地方重复使用 -->
+     <sql id="ChargeProjectSituationCondition">
+           <where>
+		         c.patientID = p.patientID and c.isDelete = 0 and p.isDelete = 0
+				  <if test="chargeType !=null and chargeType !=''">
+				      and chargeType like concat('%',concat(#{chargeType},'%'))
+				  </if>
+				  <if test=" chargeTypeMoney1 != null">
+	           		  <if test="chargeTypeMoney2 == null">
+	             			and chargeTypeMoney >= #{chargeTypeMoney1}
+	           		  </if>
+	           		  <if test=" chargeTypeMoney2 !=null">
+		           			and chargeTypeMoney between #{chargeTypeMoney1} and #{chargeTypeMoney2}
+		        	  </if>
+        		  </if>
+        		  <!-- <if test="chargeTypeMoney1 == null">
+	           		  <if test=" chargeTypeMoney2 !=null">
+		           			and chargeTypeMoney <= #{chargeTypeMoney2}
+		        	  </if>        		  	  
+        		  </if> -->
+				  <if test="flagCheckOut !=null and flagCheckOut != ''">
+				      and flagCheckOut like concat('%',concat(#{flagCheckOut},'%'))
+				  </if>
+				  <if test="flagTransfer !=null and flagTransfer !=''">
+				      and flagTransfer like concat('%',concat(#{flagTransfer},'%'))
+				  </if>
+				  <if test="patient.patientName !=null and patient.patientName !=''">
+				      and p.patientName like concat('%',concat(#{patient.patientName},'%'))
+				  </if>
+		    </where>
+     </sql>
+   
+   <select id="selectByCondition" parameterType="map" resultMap="resultChargeProjectSituation">
+   		SELECT c.*,p.*
+		    from ChargeProjectSituation c, Patient p
+		   <include refid="ChargeProjectSituationCondition"/>
+   </select>
+   
+   
+   
+   <select id="query" resultMap="resultChargeProjectSituation">
+   		SELECT c.*,p.*
+		    from ChargeProjectSituation c, Patient p
+		       where c.patientID=p.patientID
+   </select>
+   
+   
+   
+   <select id="selectByID" parameterType="Integer" resultType="ChargeProjectSituation">
+   		select * from ChargeProjectSituation where chargeID=#{chargeID}
+   </select>
+   
+   
+   
+   
+    <!-- 修改 -->
+    <update id="update" parameterType="ChargeProjectSituation">
+         update ChargeProjectSituation set
+         <if test="chargeType !=null and chargeType !=''">
+             chargeType=#{chargeType},
+		 </if>
+         <if test="chargeTypeMoney !=null and chargeTypeMoney !=''">
+		     chargeTypeMoney=#{chargeTypeMoney},
+		 </if>
+		 <if test="flagCheckOut !=null and flagCheckOut !=''">
+		     flagCheckOut=#{flagCheckOut},
+		 </if>
+         <if test="flagTransfer !=null and flagTransfer !=''">
+		     flagTransfer=#{flagTransfer},
+		 </if>
+		 <if test="patientID !=null and patientID !=''">
+		     patientID=#{patientID}
+		 </if>
+		  where chargeID=#{chargeID}
+    </update>
+    
+    
+    <!-- 删除 -->
+    <update id="delete">
+    update ChargeProjectSituation set
+    <if test="chargeID !=null and chargeID !=''">
+    	 isDelete = 1 
+    </if>
+    where chargeID=#{chargeID}
+    </update>
+    
+    <!-- 插入 -->
+    <insert id="insert" parameterType="ChargeProjectSituation">
+         <!-- 返回自动增长后的主键   keyColumn：表中的字段名   keyProperty:类中的属性名
+          select  uuid()   resultType="String"
+           -->
+<!--         <selectKey keyColumn="chargeID" keyProperty="chargeID" resultType="int"> -->
+<!--              SELECT LAST_INSERT_ID() -->
+<!--         </selectKey> -->
+        
+         insert into ChargeProjectSituation (chargeID,patientID,chargeType,chargeTypeMoney,flagCheckOut,flagTransfer,isDelete)
+       values (#{chargeID},#{patientID},#{chargeType},#{chargeTypeMoney},#{flagCheckOut},#{flagTransfer},0)
+    </insert>
+
+
+</mapper>

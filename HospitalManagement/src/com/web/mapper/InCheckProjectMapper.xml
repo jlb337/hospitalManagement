@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace:命名空间  -->
+<mapper namespace="com.web.dao.InCheckProjectDao">
+
+   <!-- 自定义结果集 -->
+   <resultMap type="InCheckProject" id="resultInCheckProject">
+   
+     <!-- 主键   column:表中的字段名称      property:类中的属性名称 -->
+      <id column="inCheckID" property="inCheckID"/>
+      
+      <result column="isDelete" property="isDelete"/>
+      <result column="patientID" property="patientID"/>
+      <result column="checkName" property="checkName"/>
+      <result column="checkDate" property="checkDate"/>
+      <result column="checkLeader" property="checkLeader"/>
+      <result column="checkContent" property="checkContent"/>
+      <result column="checkResult" property="checkResult"/>
+
+   <!-- 多对一   property:属性名称   javaType：关联的对象类型-->
+     <association property="patient" javaType="Patient">
+         <id column="patientID" property="patientID"/>
+           
+          <result column="patientName" property="patientName"/>
+          <result column="sex" property="sex"/>
+          <result column="ID" property="ID"/>
+     </association>
+     
+  </resultMap>
+        
+     <!-- 自定义SQL语句，以便于其他地方重复使用 -->
+     <sql id="InCheckProjectCondition">
+           <where>
+		          i.patientID = p.patientID
+		          and p.isDelete = 0
+		          and i.isDelete = 0
+				 
+				 <if test="checkName!=null and  checkName!=''">
+				       and i.checkName like concat('%',concat(#{checkName},'%'))
+				 </if>
+			 	
+			 	<if test="patient.patientName!=null and  patient.patientName!=''">
+				       and p.patientName like concat('%',concat(#{patient.patientName},'%'))
+				 </if>				 
+				 
+				 <if test="patient.ID!=null and  patient.ID!=''">
+				       and p.ID like concat('%',concat(#{patient.ID},'%'))
+				 </if>
+				 
+		    </where>
+     </sql>
+
+
+    <select id="queryByCondition" resultMap="resultInCheckProject" parameterType="InCheckProject">
+            SELECT i.*,p.*
+		    from InCheckProject i,Patient p
+		   <include refid="InCheckProjectCondition"/>
+    </select>
+    
+    
+     <update id="update" parameterType="InCheckProject">
+         update InCheckProject set
+         <if test="checkName != null">
+			checkName = #{checkName},
+		   </if>
+		   <if test="patientID != null">
+			patientID = #{patientID},
+		   </if>
+		   <if test="checkDate != null">
+			checkDate = #{checkDate},
+		   </if>
+		   <if test="checkLeader != null">
+			checkLeader=#{checkLeader},
+		   </if>
+		   <if test="checkContent != null">
+			checkContent=#{checkContent},
+		   </if>
+		   <if test="checkResult != null">
+			checkResult=#{checkResult}
+		   </if>
+          
+		  where inCheckID=#{inCheckID}
+    </update>
+    
+     <select id="queryById" parameterType="Integer" resultMap="resultInCheckProject" >
+           SELECT i.*,p.*
+		    from InCheckProject i,Patient p
+		    <where>
+		          and i.patientID = p.patientID
+		          and p.isDelete = 0
+		          and i.isDelete = 0
+		          and i.inCheckID = #{inCheckID}
+		    </where>
+    </select>
+    
+    <update id="delete" parameterType="Integer">
+         update InCheckProject set
+          isDelete = 1
+		  where inCheckID=#{inCheckID}
+    </update>
+    
+    <insert id="add" parameterType="InCheckProject">
+    	insert into InCheckProject (isDelete,checkName,patientID,checkDate,checkLeader,checkContent,checkResult) 
+    	values (0,#{checkName},#{patientID},#{checkDate},#{checkLeader},#{checkContent},#{checkResult});
+    </insert>
+    
+</mapper>
+

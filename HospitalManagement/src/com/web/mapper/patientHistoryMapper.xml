@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.PatientHistoryDao">
+ 
+  <resultMap id="BaseResultMap" type="com.web.entity.PatientHistory">
+    <id column="patientHistoryID" jdbcType="INTEGER" property="patientHistoryID" />
+    <result column="isDelete" jdbcType="INTEGER" property="isDelete" />
+    <result column="userId" jdbcType="INTEGER" property="userId" />
+    <result column="diagnosisDate" jdbcType="DATE" property="diagnosisDate" />
+    <result column="patientHistoryRecord" jdbcType="VARCHAR" property="patientHistoryRecord" />
+    <result column="historytype" jdbcType="INTEGER" property="historytype" />
+ 	<association property="user" javaType="User">
+ 		 <id column="userId" jdbcType="INTEGER" property="userId" />
+	    <result column="poId" jdbcType="INTEGER" property="poId" />
+	    <result column="departmentID" jdbcType="INTEGER" property="departmentID" />
+	    <result column="userName" jdbcType="VARCHAR" property="userName" />
+	    <result column="userPassword" jdbcType="VARCHAR" property="userPassword" />
+	    <result column="userPhoto" jdbcType="VARCHAR" property="userPhoto" />
+	    <result column="userSex" jdbcType="VARCHAR" property="userSex" />
+	    <result column="userBirthday" jdbcType="DATE" property="userBirthday" />
+	    <result column="userCard" jdbcType="VARCHAR" property="userCard" />
+	    <result column="userState" jdbcType="INTEGER" property="userState" />
+	    <result column="userDescribe" jdbcType="VARCHAR" property="userDescribe" />
+	    <result column="marrySituation" jdbcType="VARCHAR" property="marrySituation" />
+	    <result column="level" jdbcType="VARCHAR" property="level" />
+	    <result column="birthPlace" jdbcType="VARCHAR" property="birthPlace" />
+	    <result column="nation" jdbcType="VARCHAR" property="nation" />
+	    <result column="country" jdbcType="VARCHAR" property="country" />
+	    <result column="Telephone" jdbcType="VARCHAR" property="telephone" />
+	    <result column="Idplace" jdbcType="VARCHAR" property="idplace" />
+	    <result column="isDelete" jdbcType="INTEGER" property="isDelete" />
+ 	</association>
+  </resultMap>
+  
+  
+ 
+ <insert id="insert" parameterType="PatientHistory">
+ 	insert into PatientHistory values(0,#{patientHistoryID},#{userId},#{diagnosisDate},#{patientHistoryRecord},#{historytype})
+ </insert>
+   
+  <select id="queryByCondition"  resultMap="BaseResultMap" parameterType="PatientHistory">
+ 	 select * from PatientHistory p,User u
+ 	 <where>
+		  p.userId=u.userId 
+		  <if test="user!=null and user!=''">
+		  <if test="user.userName!=null and user.userName!=''">
+		    		and u.userName like concat('%',concat(#{user.userName},'%'))
+	    	</if>
+	    </if>
+		   <if test="diagnosisDate!=null and diagnosisDate!=''">
+		    		and p.diagnosisDate =#{diagnosisDate}
+	    	</if>
+	    	<if test="patientHistoryRecord!=null and patientHistoryRecord!=''">
+	    		and p.patientHistoryRecord like concat('%',concat(#{patientHistoryRecord},'%'))
+	    	</if>
+	    	<if test="historytype!=null and historytype!=''">
+	    		and p.historytype like '%${historytype}%'
+	    	</if>
+	    	and p.isDelete=0 and u.isDelete=0
+		  </where>
+  </select>
+  
+  
+  <select id="findById" resultMap="BaseResultMap" parameterType="Integer">
+		select * from PatientHistory where patientHistoryID=#{patientHistoryID}
+  </select>
+  
+  
+  <update id="update" parameterType="PatientHistory">
+  		update PatientHistory set  
+  		<if test="diagnosisDate!=null and diagnosisDate!=''">
+             diagnosisDate=#{diagnosisDate}
+          </if>
+           <if test="userId!=null and  userId!=''">
+		      ,userId=#{userId}
+		  </if>
+		   <if test="patientHistoryRecord!=null and  patientHistoryRecord!=''">
+		      ,patientHistoryRecord=#{patientHistoryRecord}
+		  </if>
+		  <if test="historytype!=null and historytype!=''">
+		      ,historytype=#{historytype}
+		  </if>
+		  where patientHistoryID=#{patientHistoryID}
+  </update>
+  
+  <update id="delete" parameterType="PatientHistory">
+  		update PatientHistory  set isDelete=1 where patientHistoryID=#{patientHistoryID}
+  </update>
+  
+</mapper>
